@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Civic Research Sandbox — Community Questions & Source Audit</title>
+<style>
+:root{--ink:#222;--muted:#666;--line:#ccc;--soft:#f5f5f5}
+*{box-sizing:border-box}
+body{margin:0;padding:32px;background:#e9e9e9;color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}
+.page{max-width:900px;margin:auto;background:white;padding:48px 56px;box-shadow:0 2px 14px #0001}
+h1{margin:0 0 8px;font-size:30px}h2{margin:36px 0 12px;font-size:22px;border-bottom:1px solid var(--line);padding-bottom:6px}h3{margin:24px 0 8px;font-size:18px}.subtitle,.muted{color:var(--muted)}
+.box{border:1px solid var(--line);padding:18px;margin:18px 0;background:var(--soft)}
+.field{margin:12px 0}label{display:block;font-weight:650;margin-bottom:5px}
+input,textarea{width:100%;border:1px solid #aaa;border-radius:4px;padding:9px;font:inherit;background:#fff}
+textarea{min-height:85px;resize:vertical}.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.checks label{font-weight:400;margin:5px 0}.checks input{width:auto;margin-right:7px}
+.actions{position:sticky;top:0;background:#fff;padding:12px 0;border-bottom:1px solid var(--line);margin-bottom:20px;z-index:5}
+button{border:1px solid #777;background:white;border-radius:5px;padding:9px 14px;margin-right:8px;cursor:pointer;font:inherit}
+button.primary{background:#222;color:white}.question{border-top:2px solid #222;margin-top:36px;padding-top:18px}.source{border-left:3px solid #aaa;padding-left:12px}
+.footer{margin-top:50px;padding-top:18px;border-top:1px solid var(--line);color:var(--muted);font-size:14px}
+@media print{body{background:white;padding:0}.page{box-shadow:none;max-width:none;padding:24px}.actions,.no-print{display:none!important}input,textarea{border:0;padding:0}}
+@media(max-width:650px){body{padding:0}.page{padding:28px 22px}.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="page">
+<div class="actions no-print">
+<button class="primary" onclick="window.print()">Print / Save as PDF</button>
+<button onclick="addQuestion()">Add Question</button>
+<button onclick="clearTemplate()">Reset</button>
+</div>
+
+<h1>CIVIC RESEARCH SANDBOX</h1>
+<p class="subtitle">Community Questions &amp; Source Audit</p>
+<div class="box">
+<strong>Research flow:</strong> Question → Preliminary answer → Source → Check the source → Who can answer/verify? → Who makes the decision? → What remains unknown
+</div>
+
+<h2>What this is</h2>
+<p>This is an open working template for turning community questions into research that other people can check.</p>
+<p>A concern or reported statement is not automatically a verified fact. A preliminary answer is not automatically verified. A source being listed is not the same as the source having been checked.</p>
+<p>This template is designed to work without requiring a person's name, organization, or private conversation to appear in the public research record.</p>
+
+<h2>Document information</h2>
+<div class="grid">
+<div class="field"><label>Project / subject</label><input id="project" placeholder="Enter subject"></div>
+<div class="field"><label>Last updated</label><input id="date" type="date"></div>
+</div>
+<div class="field"><label>Introduction / purpose</label>
+<textarea id="intro">This is a working research document. Questions may come from community discussions, public records, direct conversations, or other sources. Community concerns are distinguished from verified facts. Answers may change as new information becomes available.</textarea>
+</div>
+
+<h2>How to use this sandbox</h2>
+<div class="box">
+<p><strong>1. Ask a question.</strong> Start with what needs to be understood.</p>
+<p><strong>2. Record a preliminary answer.</strong> Make the current understanding visible, but label it preliminary.</p>
+<p><strong>3. Find the source.</strong> Identify the document, record, rule, agency, or other source that should establish the answer.</p>
+<p><strong>4. Check the source.</strong> Open it and ask whether it actually supports the statement.</p>
+<p><strong>5. Identify authority.</strong> Separate the person or agency that can answer or verify from the person or body that actually makes the decision.</p>
+<p><strong>6. Record uncertainty.</strong> UNKNOWN, NOT YET MAPPED, PARTLY VERIFIED, and DISPUTED are legitimate results.</p>
+<p><strong>7. Update.</strong> Correct the record when better information becomes available.</p>
+</div>
+
+<main id="questions"></main>
+
+<h2>Overall research audit</h2>
+<div class="box">
+<p><strong>What do we think? What did somebody tell us? What does the source actually say? What can we verify? What remains unknown?</strong></p>
+<p>An “unverified” or “unknown until later” result is legitimate. The purpose is to make the path from question to answer—and from error to correction—visible and easy for someone else to follow.</p>
+</div>
+
+<h2>Anonymous participation</h2>
+<p>A question can be entered without identifying the person who raised it. If a source is relevant, record the source itself rather than unnecessary personal information. Private conversations should not be reproduced publicly without permission.</p>
+
+<div class="footer">Open working template. Not an official government document. Verify current information against the authoritative source before relying on it. The template itself is open to correction and improvement.</div>
+</div>
+
+<script>
+const samples=[
+"What is currently being proposed?",
+"Are the materials we are seeing preliminary or final?",
+"Has the responsible authority made a decision yet?",
+"What rules or standards will be used to evaluate the proposal?",
+"What important questions remain unanswered?"
+];
+function esc(s){return String(s||"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+function block(q,i){return `<section class="question">
+<h2>Question ${i+1}</h2>
+<div class="field"><label>Question</label><textarea class="q">${esc(q)}</textarea></div>
+<h3>Preliminary answer</h3><div class="field"><textarea></textarea></div>
+<h3>Source(s)</h3><div class="field source"><textarea placeholder="Paste actual URLs, documents, records, emails, etc. One source per line."></textarea></div>
+<h3>Source audit</h3>
+<div class="checks">
+<label><input type="checkbox"> Source opened</label>
+<label><input type="checkbox"> Relevant section read / skimmed</label>
+<label><input type="checkbox"> Source supports the answer</label>
+<label><input type="checkbox"> Source only partially supports the answer</label>
+<label><input type="checkbox"> Source does not support the answer</label>
+</div>
+<div class="field"><label>Audit notes</label><textarea></textarea></div>
+<h3>Who can answer or verify this?</h3>
+<div class="field"><label>Name / agency / role</label><textarea></textarea></div>
+<div class="field"><label>Why this person / agency?</label><textarea></textarea></div>
+<div class="field"><label>Contact path — email / phone / webpage</label><textarea></textarea></div>
+<h3>Who makes the decision, if different?</h3>
+<div class="field"><label>Decision-maker / body</label><textarea></textarea></div>
+<div class="field"><label>Role in this decision</label><textarea></textarea></div>
+<div class="field"><label>Decision / process link</label><textarea placeholder="Official process page, agenda, ordinance, application, etc."></textarea></div>
+<h3>What remains unknown?</h3><div class="field"><textarea></textarea></div>
+<button class="no-print" onclick="this.closest('.question').remove();renumber()">Remove question</button>
+</section>`;}
+function render(){document.getElementById("questions").innerHTML=samples.map(block).join("");}
+function addQuestion(){let n=document.querySelectorAll(".question").length;document.getElementById("questions").insertAdjacentHTML("beforeend",block("",n));renumber();}
+function renumber(){document.querySelectorAll(".question").forEach((x,i)=>x.querySelector("h2").textContent="Question "+(i+1));}
+function clearTemplate(){if(confirm("Reset to the five sample questions?"))render();}
+document.getElementById("date").value=new Date().toISOString().slice(0,10);render();
+</script>
+</body>
+</html>
