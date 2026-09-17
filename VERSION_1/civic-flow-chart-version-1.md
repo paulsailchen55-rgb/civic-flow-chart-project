@@ -232,6 +232,8 @@ The correction mechanism should remain simple. A useful basic signal is:
 
 **THIS LOOKS WRONG.**
 
+The ledger itself must not become a new bureaucracy that creates more friction than it removes.
+
 ### Lab
 
 A testing space for alternatives and simulations. Assumptions can be changed and results compared without pretending that the alternative is current government practice.
@@ -369,7 +371,117 @@ Potential placement includes:
 
 The framework should work without AI, social media, or a user account.
 
-## 21. Santa Cruz test environment
+## 21. Resident feedback and the evidence bridge
+
+A civic process should not end, for purposes of learning, when the official transaction ends.
+
+Residents routinely encounter noise, delays, confusing instructions, access barriers, repeated work, unexpected costs, safety concerns, or other friction while using public systems. Those observations may be reported through many channels. A Civic Flow implementation should provide a clear path for a resident to submit a report or question and have it routed toward the organization or process owner responsible for the relevant node.
+
+This creates an **evidence bridge** between the person experiencing a system and the people responsible for operating, administering, reviewing, or making decisions about that system.
+
+The bridge should make five things visible:
+
+1. **REPORT** — What did the person observe or experience?
+2. **ROUTE** — Which process, node, office, or responsible organization does it concern?
+3. **RECEIPT** — Was the report successfully received, and when?
+4. **STATUS** — Is it awaiting review, being investigated, referred, resolved, disputed, or otherwise classified?
+5. **USE** — If appropriate, can the information contribute to aggregate evidence for maintaining, reviewing, or changing the process?
+
+The system should distinguish **reporting a problem** from **requesting a particular outcome**. Routing a report to the responsible organization does not guarantee that the organization will agree with the report or change the process.
+
+### Designed-for-system feedback
+
+The goal is not simply to collect complaints. The goal is to make feedback usable by the system that the feedback describes.
+
+Where appropriate, a report should be able to carry structured information such as:
+
+- date and approximate time;
+- location or affected node;
+- type of friction;
+- description of what happened;
+- observed duration or clock;
+- frequency or recurrence;
+- evidence supplied by the reporter;
+- source or originating channel;
+- routing destination;
+- receipt confirmation;
+- status and disposition;
+- whether the information may be aggregated for analysis.
+
+The design should support both **individual case handling** and **aggregate pattern detection**. A single report may matter as an individual experience; repeated reports may reveal a recurring system condition. Neither should automatically be treated as proof of a policy change.
+
+### Confirmation and traceability
+
+A resident should not have to guess whether a report disappeared into an unrelated channel.
+
+Where technically and legally appropriate, the system should provide a confirmation by email, text message, printed receipt, or another accessible method showing:
+
+- that the report was received;
+- where it was routed;
+- when it was routed;
+- how to check status;
+- how to correct the report if it was routed incorrectly;
+- what review or response, if any, is expected.
+
+This confirmation is a navigation and accountability function, not a promise of a particular government response.
+
+### Privacy and aggregation
+
+Public visibility and privacy are separate design questions.
+
+A useful implementation should allow appropriate reports to contribute to aggregate public evidence without automatically exposing a resident's identity or private details. It should distinguish at least:
+
+- **private case record** — information needed for handling the individual matter;
+- **restricted information** — information that cannot appropriately be made public;
+- **public aggregate** — anonymized or otherwise appropriately de-identified patterns that can be shared for civic understanding;
+- **public source evidence** — records already legitimately available to the public.
+
+Anonymization is not a guarantee of privacy by itself. A production system would need appropriate privacy, records-management, security, retention, and legal review.
+
+### Feedback is not the same as a survey
+
+A standing feedback path and a formal survey answer different questions.
+
+A survey can deliberately sample or ask a defined set of questions. A standing feedback path can capture problems and observations when people actually encounter them. The Civic Flow Chart should not assume that either source is sufficient by itself.
+
+The evidence bridge should therefore preserve provenance and distinguish:
+
+**OBSERVATION → REPORT → ROUTING → VERIFICATION → AGGREGATION → REVIEW/DECISION**
+
+The map can make this pathway visible without claiming that every report is verified or that every verified report requires a change.
+
+### Decision boundary
+
+The Civic Flow Chart should make the transition from evidence to decision visible without taking the decision away from the institution or legally authorized decision-maker.
+
+In other words:
+
+**PEOPLE REPORT → SYSTEM ROUTES → RESPONSIBLE PEOPLE REVIEW → AUTHORIZED ACTOR DECIDES → RECORD/RESPONSE → MAP UPDATES IF NEEDED**
+
+The identity of the responsible reviewer and the legally authorized decision-maker may be different. The map should show that distinction rather than assuming that the person who receives a complaint has authority to change the underlying rule or system.
+
+This is an important part of the framework's agency model:
+
+> **People should be able to reach the people responsible for the system, and the people responsible for the system should be able to see the evidence produced by its use.**
+
+## 22. Institutional placement
+
+The Civic Flow Chart should be placed as an explanatory layer alongside authoritative institutions rather than presented as a new authority.
+
+Potential placement includes:
+
+- public libraries;
+- city and county information systems;
+- planning and community development resources;
+- emergency-management information;
+- state-agency information;
+- community organizations;
+- printable public reference materials;
+- basic HTML and other open formats.
+
+The framework should work without AI, social media, or a user account.
+
+## 23. Santa Cruz test environment
 
 Santa Cruz County is the initial test environment.
 
@@ -377,7 +489,7 @@ The test environment is useful because a resident may encounter overlapping resp
 
 The Santa Cruz examples are tests of the framework. They are not intended to define the framework or establish official facts without verification.
 
-## 22. Self-audit / hostile-user test
+## 24. Self-audit / hostile-user test
 
 The framework must be tested against the possibility that it creates the problem it is intended to solve.
 
@@ -393,7 +505,13 @@ Potential failure modes:
 - the map creates false confidence that government is fully coherent;
 - visible choices appear to be decisions made by the map;
 - sophisticated users benefit more than people with fewer resources;
-- the project itself becomes an institution that resists replacement.
+- the project itself becomes an institution that resists replacement;
+- feedback collection becomes a complaint warehouse with no usable routing or status;
+- automated routing sends people to the wrong authority without an easy correction path;
+- public aggregation exposes people through supposedly anonymous reports;
+- the feedback system becomes a new required step for obtaining service;
+- staff are overwhelmed by duplicate, abusive, irrelevant, or unstructured submissions;
+- a high volume of reports is mistaken for proof that a particular policy change is correct.
 
 Primary hostile-user questions:
 
@@ -401,7 +519,9 @@ Primary hostile-user questions:
 
 > **What happens if the Civic Flow Chart itself becomes friction?**
 
-## 23. Success criteria
+> **What happens if the feedback bridge becomes a new wall between residents and government?**
+
+## 25. Success criteria
 
 A useful implementation should allow an ordinary resident to:
 
@@ -412,30 +532,42 @@ A useful implementation should allow an ordinary resident to:
 - see known costs and consequences;
 - locate review, appeal, correction, backtrack, or exit paths;
 - verify important information at its source;
-- recognize uncertainty instead of being given false certainty.
+- recognize uncertainty instead of being given false certainty;
+- submit a report or question through a clearly identified route when such a route is appropriate;
+- receive a meaningful receipt or confirmation where the implementation supports it;
+- determine where the report was routed and how to correct a routing error;
+- understand whether information is private, restricted, or publicly aggregated.
 
 A useful implementation should allow staff or institutions to:
 
 - see handoffs;
 - identify unclear responsibility;
 - identify repeated work and friction;
+- receive appropriately routed reports;
+- distinguish individual cases from aggregate patterns;
 - correct mapped information;
 - preserve historical versions;
-- understand how a resident experiences the process.
+- understand how a resident experiences the process;
+- identify when a report requires another authority or decision-maker;
+- communicate status or disposition where appropriate.
 
-The framework should remain usable in print and basic HTML.
+The framework should remain usable in print and basic HTML. A paper or basic web version may provide routing instructions and source information even when automated confirmation is unavailable.
 
-## 24. Development sequence
+## 26. Development sequence
 
 The intended development sequence is:
 
 **RESEARCH → MAP → CHILD TEST → SUBSTANTIVE REVIEW → STRUCTURAL REVIEW → RENDERING REVIEW → RECIPIENT REVIEW → RELEASE → OBSERVE → REVISE → ARCHIVE**
 
+For feedback-enabled implementations, add:
+
+**REPORT → ROUTE → CONFIRM → REVIEW → AGGREGATE/RESPOND → DECIDE → RECORD → MAP UPDATE**
+
 Working rule:
 
 **Fast production. Slow release.**
 
-## 25. Future technical layer
+## 27. Future technical layer
 
 Once the conceptual model is sufficiently tested, the project may add:
 
@@ -446,6 +578,9 @@ Once the conceptual model is sufficiently tested, the project may add:
 - interactive maps;
 - source-verification records;
 - lightweight ledger functions;
+- resident feedback and routing interfaces;
+- confirmation and status mechanisms;
+- privacy-preserving aggregation;
 - archive/version comparison;
 - emergency views;
 - APIs;
@@ -453,10 +588,10 @@ Once the conceptual model is sufficiently tested, the project may add:
 
 Technology should implement the model, not silently redefine it.
 
-## 26. Version boundary
+## 28. Version boundary
 
 Version 1 is intentionally a framework specification rather than a finished software product.
 
-It establishes the vocabulary, distinctions, routing logic, self-audit principles, and initial test environment needed for later implementation.
+It establishes the vocabulary, distinctions, routing logic, evidence bridge, self-audit principles, and initial test environment needed for later implementation.
 
 Future versions may change the model. Changes should be documented rather than silently overwriting the history of the project.
