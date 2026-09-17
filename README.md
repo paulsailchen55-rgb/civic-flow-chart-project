@@ -81,7 +81,7 @@ before asking:
 
 > **What do I need to do?**
 
-Friction may serve a legitimate purpose such as safety, environmental protection, public participation, rights protection, accessibility, or accountability. It may also accumulate through handoffs, duplicate requirements, unclear information, waiting, cost, distance, technology, or uncertainty.
+Friction may serve a legitimate purpose such as safety, environmental protection, public participation, rights, accessibility, or accountability. It may also accumulate through handoffs, duplicate requirements, unclear information, waiting, cost, distance, technology, or uncertainty.
 
 The purpose of mapping friction is to make its function and cost inspectable—not to assume that all friction is unnecessary.
 
@@ -160,7 +160,7 @@ The ledger itself must not become a new bureaucracy that creates more friction t
 
 ### Lab
 
-A place to test alternatives and simulations by changing assumptions, routing, authority, clocks, costs, or other variables.
+A place to test alternatives and simulations by changing assumptions, authority, clocks, cost, or routing.
 
 ### Archive
 
@@ -216,7 +216,7 @@ It is a design model, not a claim about a physical scientific force.
 
 ## Maintenance and uncertainty
 
-Time-sensitive nodes should carry information such as:
+Time-sensitive nodes need information such as:
 
 - source owner;
 - source location;
@@ -230,6 +230,90 @@ The valid state **UNKNOWN / NOT YET MAPPED** is preferable to invented completen
 A node may also be marked **DISPUTED** when relevant parties or sources disagree.
 
 > The map does not have to settle every disagreement. It has to make the disagreement inspectable.
+
+## Resident feedback and the evidence bridge
+
+The Civic Flow Chart should not stop at navigation. Where appropriate, it should also provide a clear path for a resident's observation of a civic process to reach the organization responsible for operating, administering, reviewing, or making decisions about the relevant part of that system.
+
+The basic loop is:
+
+**PEOPLE REPORT → SYSTEM ROUTES → RESPONSIBLE PEOPLE REVIEW → AUTHORIZED ACTOR DECIDES → RECORD/RESPONSE → MAP UPDATES IF NEEDED**
+
+The feedback bridge should make at least these stages visible:
+
+- **Report** — what was observed or experienced, and where in the process it occurred;
+- **Route** — which process, node, office, or organization is responsible;
+- **Receipt** — confirmation that the report entered the intended channel, where practical;
+- **Status** — what happened to it afterward;
+- **Use** — whether it can appropriately contribute to aggregate evidence or system review.
+
+### Experience and reflection
+
+The system should preserve two different observation moments:
+
+**IN-THE-MOMENT OBSERVATION** — what the person reported while experiencing the process.
+
+**LATER REFLECTION** — what the person reported after having time to process the experience.
+
+Neither should automatically overwrite the other or be treated as automatically superior. Immediate reports can be affected by emotion, fear, embarrassment, or time pressure. Later reflections can be affected by memory, social influence, incentives, or subsequent information.
+
+The important design goal is to preserve provenance and context:
+
+**EXPERIENCE → REFLECTION**
+
+Emotion may be important evidence about a person's experience without automatically establishing an external fact. The system should distinguish what a person reported from what can be independently verified.
+
+### Confirmation and traceability
+
+Where technically and legally appropriate, confirmation can be provided by email, text message, printed receipt, or another accessible method. A confirmation may identify the receiving system, routing destination, receipt time, reference information, status, and correction path.
+
+A receipt is not a promise that the report is correct, that the recipient agrees, or that the system will change.
+
+### Authority and responsibility
+
+The person or office receiving a report may not be the person authorized to change the underlying system. The map should distinguish, where applicable:
+
+**REPORTER → RECEIVER → ROUTER → RESPONSIBLE OPERATOR → REVIEWER → AUTHORIZED DECISION-MAKER**
+
+This prevents a generic complaint channel from being mistaken for decision-making authority.
+
+### Individual reports and aggregate evidence
+
+A single report may document an important individual experience. Multiple reports may reveal recurrence, location, timing, failed handoffs, or another pattern. Neither volume alone nor a single report automatically determines policy.
+
+The evidence path should remain inspectable:
+
+**OBSERVATION → REPORT → ROUTING → VERIFICATION → AGGREGATION → REVIEW/DECISION**
+
+### Feedback is not the same as a survey
+
+A standing feedback path and a formal survey can serve different purposes. A standing path can capture observations close to the time and place of actual interaction. A survey can deliberately ask a defined population a standardized set of questions later.
+
+The Civic Flow Chart should preserve the provenance and conditions of each kind of evidence rather than assuming one mechanism is sufficient by itself.
+
+### Privacy and aggregation
+
+Public visibility and privacy are separate design questions. Where appropriate and lawful, individual case information can remain restricted while appropriately de-identified aggregate patterns are made available for civic understanding.
+
+Possible classes are:
+
+**PRIVATE CASE DATA → RESTRICTED INFORMATION → PUBLIC AGGREGATE → PUBLIC SOURCE EVIDENCE**
+
+Anonymization by itself does not guarantee privacy. A production implementation requires appropriate privacy, security, records-management, retention, and legal review.
+
+### Lightweight correction
+
+A resident should be able to say:
+
+> **THIS LOOKS WRONG.**
+
+The system should be able to route the correction, preserve the prior version, and show the resulting status without requiring the resident to understand the entire architecture.
+
+### Decision boundary
+
+The feedback bridge routes and preserves evidence; it does not itself determine policy outcomes. Possible institutional responses include clarification, correction, operational adjustment, investigation, further study, referral, no change, or a proposal for formal action.
+
+The bridge is intended to connect people and institutions, not replace authorized decision-making.
 
 ## Self-audit
 
@@ -248,15 +332,21 @@ Potential failure modes include:
 - creating transparency that introduces a new gatekeeper;
 - implying that government is more coherent than it really is;
 - creating a correction process that becomes another bureaucracy;
-- displaying choices in a way that appears to make the choices itself.
+- displaying choices in a way that appears to make the choices itself;
+- turning feedback into a complaint warehouse with no usable routing or status;
+- sending reports to the wrong authority without an easy correction path;
+- exposing people through supposedly anonymous aggregation;
+- making the feedback system a new prerequisite for obtaining service;
+- overwhelming staff with duplicate, abusive, irrelevant, or unusable submissions;
+- treating report volume as automatic proof of a particular policy conclusion.
 
-The red-team question is:
+The red-team questions include:
 
 > **Who gets to decide that the Civic Flow Chart itself is correct?**
 
-And:
-
 > **What happens if the Civic Flow Chart itself becomes friction?**
+
+> **What happens if the feedback bridge becomes another wall between residents and the people responsible for the system?**
 
 ## Design principles
 
@@ -272,6 +362,8 @@ And:
 10. **Design for people with little time, money, knowledge, technology, or institutional familiarity.**
 11. **Keep proposed alternatives visibly separate from current rules.**
 12. **Allow the framework itself to be reviewed, corrected, replaced, or retired.**
+13. **Preserve both immediate experience and later reflection when collecting participant input.**
+14. **Make feedback routing and receipt traceable without turning the feedback channel into a new bureaucracy.**
 
 ## Initial test environment
 
@@ -287,6 +379,10 @@ The Version 1 working specification is in:
 
 The government-facing Version 1 packet can be added to this repository as an accessible, text-based PDF when the binary-file upload path is available.
 
+## Change history
+
+Substantive changes are recorded in `CHANGELOG.md` so that later versions can be compared with earlier ones rather than silently replacing the project's history.
+
 ## Suggested future development
 
 Future work may add:
@@ -296,6 +392,7 @@ Future work may add:
 - example civic processes;
 - source and verification records;
 - a lightweight friction ledger;
+- resident feedback and evidence intake;
 - archive/version comparison;
 - emergency-mode views;
 - testing and red-team materials;
