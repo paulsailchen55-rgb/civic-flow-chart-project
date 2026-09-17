@@ -2,6 +2,20 @@
 
 This file records substantive changes to the public working specification.
 
+## 2026-09-17 — Cross-project architecture
+
+### Added
+
+- Added `CROSS_PROJECT_CONNECTIONS.md`.
+- Established separate repositories for **School Technology & Children's Well-Being** and **Anonymized Conversation & Evidence Exchange**.
+- Defined the relationship among these projects as **cross-reference rather than absorption**.
+- Added a lightweight project crosswalk to reduce duplication and prevent related work from being lost.
+- Clarified that specialized repositories retain their own substantive research questions while the Civic Flow Chart provides broader navigation, authority, responsibility, evidence-routing, correction, archive, and public-access structure.
+
+### Working principle
+
+> **Keep the projects separate. Make the connections visible.**
+
 ## 2026-09-17 — Resident feedback and evidence bridge
 
 ### Added
