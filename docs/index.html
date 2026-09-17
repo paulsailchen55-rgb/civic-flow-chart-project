@@ -32,7 +32,8 @@ table{width:100%;border-collapse:collapse;margin:12px 0}th,td{border:1px solid v
 <body>
 <div class="page">
 <div class="actions no-print">
-<button class="primary" onclick="window.print()">Print / Save as PDF</button>
+<button class="primary" onclick="prepareResearch()">1. Prepare Research Document</button>
+<button onclick="window.print()">2. Print / Save as PDF</button>
 <button onclick="copyPrompt()">Copy AI Research Prompt</button>
 <button onclick="loadExample()">Load 1214 Soquel example</button>
 <button onclick="clearAll()">Clear</button>
@@ -47,6 +48,7 @@ table{width:100%;border-collapse:collapse;margin:12px 0}th,td{border:1px solid v
 </div>
 
 <p>This is a public working tool. It is not a property appraisal, legal opinion, engineering report, environmental assessment, or government determination. Its job is to organize questions and evidence so that different people can inspect the same problem.</p>
+<div class="box no-print"><strong>How to use it:</strong> Load an example or enter your information → click <strong>1. Prepare Research Document</strong> → review the generated research record → click <strong>2. Print / Save as PDF</strong>. The AI prompt can be copied separately when you want an AI research assistant to investigate the questions.</div>
 
 <h2>1. Start with the property</h2>
 <div class="grid">
@@ -165,6 +167,7 @@ table{width:100%;border-collapse:collapse;margin:12px 0}th,td{border:1px solid v
 </div>
 
 <h2>12. Finished research summary</h2>
+<div id="readyMessage" class="notice no-print" style="display:none"><strong>Research document prepared.</strong> Review the record below. When you are ready, use <strong>Print / Save as PDF</strong> at the top.</div>
 <div class="field"><label>What we currently know</label><textarea id="summaryKnow"></textarea></div>
 <div class="field"><label>What we do not yet know</label><textarea id="summaryUnknown"></textarea></div>
 <div class="field"><label>What different participants may reasonably value or be concerned about</label><textarea id="summaryViews"></textarea></div>
@@ -266,6 +269,60 @@ For every important factual claim, identify the source. Never present an unverif
 document.getElementById("prompt").value=prompt;
 }
 document.querySelectorAll("input,textarea,select").forEach(e=>e.addEventListener("input",buildPrompt));
+function prepareResearch(){
+  buildPrompt();
+  const n=val("name")||"Unnamed property/project";
+  const summary=[
+    "PROPERTY / PROJECT: "+n,
+    "ADDRESS / IDENTIFIER: "+val("address"),
+    "JURISDICTION: "+val("jurisdiction"),
+    "RESEARCH DATE: "+val("date"),
+    "",
+    "PURPOSE: "+val("purpose"),
+    "",
+    "CURRENT KNOWLEDGE",
+    "History: "+val("history"),
+    "Previous uses: "+val("uses"),
+    "Existing condition: "+val("condition"),
+    "Physical issues: "+val("physical"),
+    "Legal / contractual: "+val("legal"),
+    "Risk holders: "+val("riskOwners"),
+    "Financial constraints / estimates: "+val("financial"),
+    "",
+    "EXISTING VALUE",
+    Array.from(document.querySelectorAll("[data-table]")).map(e=>e.value.trim()).filter(Boolean).join(" | "),
+    "",
+    "OPTIONS",
+    "A — Retain / repair / rehabilitate: "+val("optionA"),
+    "B — Modify / partial redevelopment: "+val("optionB"),
+    "C — Replacement / new development: "+val("optionC"),
+    "Other: "+val("optionD"),
+    "Comparison: "+val("optionCompare"),
+    "",
+    "AUTHORITY & PROCESS",
+    "Who can verify: "+val("verifier"),
+    "Who decides: "+val("decider"),
+    "Rules: "+val("rules"),
+    "Status: "+val("status"),
+    "Clock: "+val("clock"),
+    "",
+    "FUTURE FLEXIBILITY",
+    "Choices created: "+val("futureCreate"),
+    "Choices lost / made harder: "+val("futureLose"),
+    "Reversibility: "+val("reversibility"),
+    "",
+    "UNRESOLVED / CORRECTIONS",
+    "Unknowns: "+val("unknowns"),
+    "Corrections: "+val("corrections"),
+    "",
+    "NEXT STEP: "+val("summaryNext")
+  ].join("\n");
+  document.getElementById("summaryKnow").value=summary;
+  document.getElementById("summaryUnknown").value=val("unknowns");
+  document.getElementById("summaryViews").value=val("summaryViews");
+  document.getElementById("readyMessage").style.display="block";
+  document.getElementById("readyMessage").scrollIntoView({behavior:"smooth",block:"start"});
+}
 function copyPrompt(){buildPrompt();navigator.clipboard.writeText(document.getElementById("prompt").value).then(()=>alert("AI research prompt copied."));}
 function clearAll(){if(confirm("Clear this research record?")){document.querySelectorAll("input,textarea").forEach(e=>{if(e.type==="checkbox")e.checked=false;else e.value=""});document.getElementById("date").value=new Date().toISOString().slice(0,10);buildPrompt();}}
 function loadExample(){
