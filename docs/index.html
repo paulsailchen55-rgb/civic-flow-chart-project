@@ -455,5 +455,163 @@ document.getElementById("date").value=new Date(Date.now()-new Date().getTimezone
 document.getElementById("prompt").value="";
 addSectionCopyButtons();
 </script>
+
+<style>
+@media print{
+  .print-field-value{
+    white-space:pre-wrap;
+    overflow-wrap:anywhere;
+    min-height:1em;
+    margin:4px 0 10px;
+    padding:0;
+  }
+  .print-field-value:empty::after{content:"Not entered";color:#666;font-style:italic}
+  .print-page .prompt{white-space:pre-wrap;overflow-wrap:anywhere}
+}
+.toast{
+  position:fixed;right:18px;bottom:18px;z-index:9999;
+  background:#222;color:#fff;padding:10px 14px;border-radius:6px;
+  box-shadow:0 3px 14px #0003;font-size:14px;
+}
+</style>
+<script>
+/* Functional-build pass: consistent section copying, clipboard fallback, and feedback. */
+function showToast(message){
+  const old=document.querySelector(".toast");
+  if(old) old.remove();
+  const t=document.createElement("div");
+  t.className="toast";
+  t.textContent=message;
+  document.body.appendChild(t);
+  setTimeout(()=>t.remove(),2200);
+}
+
+async function copyText(textValue,message){
+  const text=String(textValue||"").trim();
+  if(!text){showToast("Nothing to copy in this section.");return false;}
+  try{
+    if(navigator.clipboard && window.isSecureContext){
+      await navigator.clipboard.writeText(text);
+    }else{
+      const ta=document.createElement("textarea");
+      ta.value=text;
+      ta.setAttribute("readonly","");
+      ta.style.position="fixed";
+      ta.style.opacity="0";
+      document.body.appendChild(ta);
+      ta.select();
+      ta.setSelectionRange(0,ta.value.length);
+      const ok=document.execCommand("copy");
+      ta.remove();
+      if(!ok) throw new Error("copy failed");
+    }
+    showToast(message||"Copied.");
+    return true;
+  }catch(err){
+    showToast("Copy did not work. The text is still available to select manually.");
+    return false;
+  }
+}
+
+function sectionTextFromHeading(h2){
+  const wrapper=document.createElement("div");
+  wrapper.appendChild(h2.cloneNode(true));
+  const stage=h2.parentElement && h2.parentElement.classList.contains("stage");
+  let node=h2.nextElementSibling;
+  while(node){
+    if(stage ? node.classList.contains("stage") : node.tagName==="H2") break;
+    if(!node.classList.contains("no-copy")) wrapper.appendChild(node.cloneNode(true));
+    node=node.nextElementSibling;
+  }
+
+  wrapper.querySelectorAll(".section-actions,.copy-all,.actions,.no-print").forEach(e=>e.remove());
+
+  wrapper.querySelectorAll("textarea").forEach(e=>{
+    const p=document.createElement("p");
+    p.textContent=e.value||"";
+    e.replaceWith(p);
+  });
+  wrapper.querySelectorAll("input").forEach(e=>{
+    const p=document.createElement("p");
+    if(e.type==="checkbox"){
+      const label=e.closest("label");
+      p.textContent=(e.checked?"[x] ":"[ ] ")+(label?label.textContent.trim():"");
+    }else{
+      p.textContent=e.value||"";
+    }
+    e.replaceWith(p);
+  });
+  wrapper.querySelectorAll("select").forEach(e=>{
+    const p=document.createElement("p");
+    p.textContent=e.options[e.selectedIndex]?.text||e.value||"";
+    e.replaceWith(p);
+  });
+
+  return wrapper.innerText.replace(/\n{3,}/g,"\n\n").trim();
+}
+
+function addSectionCopyButtons(){
+  document.querySelectorAll(".page > h2, .page > .stage > h2").forEach(h2=>{
+    const existing=h2.nextElementSibling;
+    if(existing && existing.classList.contains("section-actions")) existing.remove();
+
+    const actions=document.createElement("div");
+    actions.className="section-actions no-print";
+    const b=document.createElement("button");
+    b.className="section-copy";
+    b.type="button";
+    b.textContent="Copy this section";
+    b.addEventListener("click",()=>{
+      copyText(sectionTextFromHeading(h2),"Section "+h2.textContent.trim()+" copied.");
+    });
+    actions.appendChild(b);
+    h2.insertAdjacentElement("afterend",actions);
+  });
+
+  document.getElementById("copyAISection")?.remove();
+  const aiHeading=Array.from(document.querySelectorAll(".page > h2"))
+    .find(h=>h.textContent.trim().startsWith("11."));
+  if(aiHeading){
+    const b=document.createElement("button");
+    b.id="copyAISection";
+    b.className="copy-all no-print";
+    b.type="button";
+    b.textContent="Copy AI Research Prompt Only";
+    b.addEventListener("click",()=>{
+      buildPrompt();
+      copyText(document.getElementById("prompt").value,"AI research prompt copied.");
+    });
+    aiHeading.insertAdjacentElement("afterend",b);
+  }
+
+  document.getElementById("copyAllRecord")?.remove();
+  const summaryHeading=Array.from(document.querySelectorAll(".page > h2"))
+    .find(h=>h.textContent.trim().startsWith("12."));
+  if(summaryHeading){
+    const b=document.createElement("button");
+    b.id="copyAllRecord";
+    b.className="copy-all no-print";
+    b.type="button";
+    b.textContent="Copy Entire Research Record";
+    b.addEventListener("click",()=>{
+      const text=Array.from(document.querySelectorAll(".page > h2, .page > .stage > h2"))
+        .filter(h=>/^([1-9]|1[0-3])\./.test(h.textContent.trim()))
+        .map(sectionTextFromHeading)
+        .join("\n\n");
+      copyText(text,"Entire research record copied.");
+    });
+    summaryHeading.insertAdjacentElement("afterend",b);
+  }
+}
+
+function copyPrompt(){
+  buildPrompt();
+  copyText(document.getElementById("prompt").value,"AI research prompt copied.");
+}
+
+/* Rebuild copy controls so there is exactly one clean copy control per section. */
+document.querySelectorAll(".section-actions,#copyAISection,#copyAllRecord").forEach(e=>e.remove());
+addSectionCopyButtons();
+</script>
 </body>
 </html>
