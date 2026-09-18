@@ -217,6 +217,7 @@ table{width:100%;border-collapse:collapse;margin:12px 0}th,td{border:1px solid v
 <tr><td><textarea class="short" data-table="5"></textarea></td><td><textarea class="short" data-table="6"></textarea></td><td><textarea class="short" data-table="7"></textarea></td><td><textarea class="short" data-table="8"></textarea></td></tr>
 <tr><td><textarea class="short" data-table="9"></textarea></td><td><textarea class="short" data-table="10"></textarea></td><td><textarea class="short" data-table="11"></textarea></td><td><textarea class="short" data-table="12"></textarea></td></tr>
 </table>
+</div>
 
 <div class="stage">
 <h2>7. Options before choosing an outcome</h2>
@@ -515,7 +516,7 @@ function buildPrintView(){
 window.addEventListener("beforeprint",()=>{buildPrintView();document.body.classList.add("printing");});
 window.addEventListener("afterprint",()=>{document.body.classList.remove("printing");const p=document.getElementById("printView");if(p)p.remove();});
 
-function clearAll(){if(confirm("Clear this research record?")){document.querySelectorAll("input,textarea").forEach(e=>{if(e.type==="checkbox")e.checked=false;else e.value=""});document.getElementById("date").value=new Date().toISOString().slice(0,10);document.getElementById("prompt").value="";document.getElementById("readyMessage").style.display="none";}}
+function clearAll(){if(confirm("Clear this research record?")){document.querySelectorAll("input,textarea").forEach(e=>{if(e.type==="checkbox")e.checked=false;else e.value=""});document.getElementById("date").value=new Date(Date.now()-new Date().getTimezoneOffset()*60000).toISOString().slice(0,10);document.getElementById("prompt").value="";document.getElementById("readyMessage").style.display="none";}}
 function loadExample(){
 document.getElementById("name").value="1214 Soquel Avenue / Seabright Plaza";
 document.getElementById("address").value="1214 Soquel Avenue, Santa Cruz, California";
@@ -549,7 +550,7 @@ document.getElementById("summaryNext").value="Open and audit the underlying City
 buildPrompt();
 window.scrollTo({top:0,behavior:"smooth"});
 }
-document.getElementById("date").value=new Date().toISOString().slice(0,10);
+document.getElementById("date").value=new Date(Date.now()-new Date().getTimezoneOffset()*60000).toISOString().slice(0,10);
 document.getElementById("prompt").value="";
 addSectionCopyButtons();
 
