@@ -432,19 +432,11 @@ function copyPrompt(){buildPrompt();navigator.clipboard.writeText(document.getEl
 function sectionTextFromHeading(h2){
   const wrapper=document.createElement("div");
   wrapper.appendChild(h2.cloneNode(true));
-  let node=h2.parentElement.classList.contains("stage") ? h2.parentElement : h2.nextElementSibling;
-  if(h2.parentElement.classList.contains("stage")){
-    while(node){
-      if(node!==h2.parentElement && node.tagName==="H2") break;
-      wrapper.appendChild(node.cloneNode(true));
-      node=node.nextElementSibling;
-    }
-  }else{
-    while(node){
-      if(node.tagName==="H2") break;
-      wrapper.appendChild(node.cloneNode(true));
-      node=node.nextElementSibling;
-    }
+  let node=h2.nextElementSibling;
+  while(node){
+    if(node.tagName==="H2") break;
+    wrapper.appendChild(node.cloneNode(true));
+    node=node.nextElementSibling;
   }
   wrapper.querySelectorAll(".section-actions,.copy-all").forEach(e=>e.remove());
   wrapper.querySelectorAll("textarea").forEach(e=>{const p=document.createElement("p");p.textContent=e.value||"";e.replaceWith(p);});
