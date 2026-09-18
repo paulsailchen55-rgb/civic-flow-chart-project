@@ -1,0 +1,586 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Property Risk, Value &amp; Options Map — Civic Flow Chart</title>
+<style>
+:root{--ink:#222;--muted:#666;--line:#c9c9c9;--soft:#f5f5f5;--accent:#174a6e}
+*{box-sizing:border-box}
+body{margin:0;padding:30px;background:#e9e9e9;color:var(--ink);font:16px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif}
+.page{max-width:980px;margin:auto;background:#fff;padding:44px 52px;box-shadow:0 2px 14px #0001}
+h1{margin:0 0 7px;font-size:30px;line-height:1.2}.subtitle{color:var(--muted);margin-top:0}
+h2{margin:34px 0 12px;font-size:21px;border-bottom:1px solid var(--line);padding-bottom:6px}
+h3{margin:23px 0 8px;font-size:18px}.box{border:1px solid var(--line);padding:17px;margin:16px 0;background:var(--soft)}
+.notice{border-left:4px solid var(--accent);padding:13px 16px;background:#f4f7f9;margin:18px 0}
+.actions{position:sticky;top:0;background:#fff;padding:11px 0;border-bottom:1px solid var(--line);margin-bottom:20px;z-index:5}
+button{border:1px solid #777;background:#fff;border-radius:5px;padding:9px 13px;margin:0 7px 7px 0;cursor:pointer;font:inherit}
+button.primary{background:#222;color:#fff}.small{font-size:14px;color:var(--muted)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.field{margin:11px 0}
+label{display:block;font-weight:650;margin-bottom:5px}
+input,textarea,select{width:100%;border:1px solid #aaa;border-radius:4px;padding:9px;font:inherit;background:#fff}
+textarea{min-height:78px;resize:vertical}.short{min-height:48px}
+.checks label{font-weight:400;margin:5px 0}.checks input{width:auto;margin-right:7px}
+.stage{border-top:2px solid #222;margin-top:28px;padding-top:15px}
+.prompt{min-height:280px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:13px}
+table{width:100%;border-collapse:collapse;margin:12px 0}th,td{border:1px solid var(--line);padding:8px;vertical-align:top;text-align:left}th{background:var(--soft)}
+.footer{margin-top:45px;padding-top:18px;border-top:1px solid var(--line);color:var(--muted);font-size:13px}
+@media print{body{background:#fff;padding:0}.page{box-shadow:none;max-width:none;padding:24px}.actions,.no-print,#printView{display:none!important}input,textarea,select{border:0;padding:0;resize:none}.prompt{min-height:0;font-family:inherit}.pagebreak{break-before:page}}
+#printView{display:none}
+@media print{body.printing > .page{display:none}body.printing > #printView{display:block}.print-page{background:#fff;max-width:980px;margin:auto;padding:24px 0}.print-page .box,.print-page .notice{break-inside:avoid}.print-page textarea,.print-page input,.print-page select{white-space:pre-wrap}.print-page table{break-inside:auto}.print-page tr{break-inside:avoid}}
+@media(max-width:700px){body{padding:0}.page{padding:28px 20px}.grid{grid-template-columns:1fr}}
+
+.section-actions{margin:-2px 0 12px;text-align:right}
+.section-copy{font-size:14px;padding:7px 11px;margin:0}
+.copy-all{margin-top:10px}
+
+.guided-panel{position:fixed;right:18px;top:90px;width:310px;max-height:calc(100vh - 108px);overflow:auto;border:1px solid #aaa;background:#fafafa;padding:14px;box-shadow:0 2px 10px #0002;z-index:10}
+.guided-panel h2{margin:0 0 8px;border:0;font-size:19px}
+.guided-panel select,.guided-panel button{width:100%;margin:0 0 8px}
+.guided-help{font-size:13px;color:#555}
+.guided-group{border-top:1px solid #ccc;margin-top:10px;padding-top:8px}
+.guided-group summary{cursor:pointer;font-weight:650;padding:6px 0}
+.guided-check{display:block;font-weight:400;font-size:14px;margin:5px 0}
+.guided-check input{width:auto;margin-right:7px}
+.guided-selected{font-size:13px;border:1px solid #ccc;background:#fff;padding:8px;min-height:35px;margin:8px 0}
+.guided-note{font-size:12px;color:#666;margin:5px 0 10px}
+@media(min-width:901px){.page{margin-right:350px;max-width:980px}}
+@media(max-width:900px){.guided-panel{position:static;width:auto;max-height:none;margin:12px 0 20px;box-shadow:none}}
+@media print{.guided-panel{display:none!important}.page{margin:auto}}
+
+.help-tip{display:inline-block;margin-left:6px}
+.help-tip button{width:auto!important;margin:0!important;padding:2px 7px!important;font-size:12px;border-radius:50%;line-height:1.2}
+.help-pop{display:none;margin:5px 0 9px;padding:8px 10px;border-left:3px solid #174a6e;background:#f1f5f7;font-size:13px;color:#444}
+.help-tip.open .help-pop{display:block}
+.example{font-size:13px;color:#666;margin:-3px 0 10px}
+.example strong{color:#444}
+.field-label{display:flex;align-items:center;gap:4px}
+@media(max-width:700px){
+ body{padding:0}
+ .guided-panel{font-size:16px}
+ .guided-panel button,.guided-panel select{min-height:44px}
+ .guided-check{padding:5px 0}
+ .help-tip button{min-height:30px!important}
+}
+</style>
+</head>
+<body>
+
+<div class="guided-panel no-print">
+<h2>Experimental Guided Standards <span class="help-tip"><button type="button" aria-expanded="false" onclick="toggleHelp(this)" title="How to use this panel">?</button><span class="help-pop">Use this panel as a helper, not a required form. Choose a destination field, open a category, check anything that seems relevant, and insert it. You can then change the wording or type anything else yourself. On a phone, tap the ? for help; there is no hover requirement.</span></span></h2>
+<p class="guided-help"><strong>Made for phones first.</strong> Tap a category to open it. Tap ? for a short explanation. Check anything that may apply, then insert it. If you do not see your situation, type it yourself in the normal field.</p><p class="example"><strong>Example:</strong> If you are unsure what “existing condition” means, the helper can suggest “Structural condition,” “Accessibility,” or “Deferred maintenance.” Those are prompts to investigate, not claims that the problem exists.</p>
+<label for="guidedTarget"><strong>Put selections into:</strong><span class="help-tip"><button type="button" aria-expanded="false" onclick="toggleHelp(this)" title="About this choice">?</button><span class="help-pop">Choose the blank or notes field where you want the checked items to be added.</span></span></label>
+<select id="guidedTarget">
+<option value="physical">Section 4 — Physical issues</option>
+<option value="condition">Section 4 — Existing condition</option>
+<option value="legal">Section 5 — Legal / contractual</option>
+<option value="riskOwners">Section 5 — Who carries risk / obligation</option>
+<option value="financial">Section 5 — Financial / market constraints</option>
+<option value="futureCreate">Section 9 — Future choices created</option>
+<option value="futureLose">Section 9 — Future choices lost / harder</option>
+<option value="reversibility">Section 9 — Reversibility</option>
+<option value="unknowns">Section 10 — Unresolved questions</option>
+<option value="summaryNext">Section 12 — Next research step</option>
+</select>
+<p class="guided-note">Selections are added to the chosen field; they do not erase existing writing.</p>
+<p class="example"><strong>Example:</strong> Choose “Section 4 — Physical issues,” check “Seismic” and “Drainage / stormwater,” then tap “Insert selected items.” The field becomes a starting point you can edit.</p>
+<details class="guided-group" open><summary>Physical / site conditions <span class="help-tip"><button type="button" aria-expanded="false" onclick="event.preventDefault();event.stopPropagation();toggleHelp(this)" title="What is this category?">?</button><span class="help-pop">Things about the land or buildings that may need inspection, documentation, or professional review.</span></span></summary>
+<label class="guided-check"><input type="checkbox" value="Structural condition">Structural condition</label>
+<label class="guided-check"><input type="checkbox" value="Seismic">Seismic</label>
+<label class="guided-check"><input type="checkbox" value="Fire / life safety">Fire / life safety</label>
+<label class="guided-check"><input type="checkbox" value="Accessibility">Accessibility</label>
+<label class="guided-check"><input type="checkbox" value="Utilities">Utilities</label>
+<label class="guided-check"><input type="checkbox" value="Drainage / stormwater">Drainage / stormwater</label>
+<label class="guided-check"><input type="checkbox" value="Environmental conditions">Environmental conditions</label>
+<label class="guided-check"><input type="checkbox" value="Deferred maintenance">Deferred maintenance</label>
+<label class="guided-check"><input type="checkbox" value="Trees / vegetation">Trees / vegetation</label>
+</details>
+<details class="guided-group"><summary>Legal / contractual <span class="help-tip"><button type="button" aria-expanded="false" onclick="event.preventDefault();event.stopPropagation();toggleHelp(this)" title="What is this category?">?</button><span class="help-pop">Documents and obligations that may attach to the property or the people using or controlling it.</span></span></summary>
+<label class="guided-check"><input type="checkbox" value="Leases / tenant agreements">Leases / tenant agreements</label>
+<label class="guided-check"><input type="checkbox" value="Easements">Easements</label>
+<label class="guided-check"><input type="checkbox" value="Title / ownership records">Title / ownership records</label>
+<label class="guided-check"><input type="checkbox" value="Contracts">Contracts</label>
+<label class="guided-check"><input type="checkbox" value="Code obligations">Code obligations</label>
+<label class="guided-check"><input type="checkbox" value="Permits">Permits</label>
+<label class="guided-check"><input type="checkbox" value="Litigation / proceedings">Litigation / proceedings</label>
+</details>
+<details class="guided-group"><summary>Existing value / function <span class="help-tip"><button type="button" aria-expanded="false" onclick="event.preventDefault();event.stopPropagation();toggleHelp(this)" title="What is this category?">?</button><span class="help-pop">What the property already does for people, businesses, residents, or the community. This is not a judgment that the value is greater or lesser.</span></span></summary>
+<label class="guided-check"><input type="checkbox" value="Housing">Housing</label>
+<label class="guided-check"><input type="checkbox" value="Local businesses">Local businesses</label>
+<label class="guided-check"><input type="checkbox" value="Services">Services</label>
+<label class="guided-check"><input type="checkbox" value="Jobs / economic activity">Jobs / economic activity</label>
+<label class="guided-check"><input type="checkbox" value="Community gathering">Community gathering</label>
+<label class="guided-check"><input type="checkbox" value="Accessibility / inclusion">Accessibility / inclusion</label>
+<label class="guided-check"><input type="checkbox" value="Cultural / historical value">Cultural / historical value</label>
+<label class="guided-check"><input type="checkbox" value="Public access / convenience">Public access / convenience</label>
+</details>
+<details class="guided-group"><summary>Process / authority <span class="help-tip"><button type="button" aria-expanded="false" onclick="event.preventDefault();event.stopPropagation();toggleHelp(this)" title="What is this category?">?</button><span class="help-pop">People or agencies that may provide information, review something, or make a decision. The checkbox does not establish legal authority; verify it.</span></span></summary>
+<label class="guided-check"><input type="checkbox" value="City Planning">City Planning</label>
+<label class="guided-check"><input type="checkbox" value="Building / code">Building / code</label>
+<label class="guided-check"><input type="checkbox" value="Fire">Fire</label>
+<label class="guided-check"><input type="checkbox" value="Public Works">Public Works</label>
+<label class="guided-check"><input type="checkbox" value="County agency">County agency</label>
+<label class="guided-check"><input type="checkbox" value="State agency">State agency</label>
+<label class="guided-check"><input type="checkbox" value="Qualified technical professional">Qualified technical professional</label>
+</details>
+<details class="guided-group"><summary>Future flexibility <span class="help-tip"><button type="button" aria-expanded="false" onclick="event.preventDefault();event.stopPropagation();toggleHelp(this)" title="What is this category?">?</button><span class="help-pop">Questions about what an option may make easier, harder, reversible, or difficult to restore later. Treat these as research prompts, not conclusions.</span></span></summary>
+<label class="guided-check"><input type="checkbox" value="Creates future housing choices">Creates future housing choices</label>
+<label class="guided-check"><input type="checkbox" value="Creates future commercial choices">Creates future commercial choices</label>
+<label class="guided-check"><input type="checkbox" value="Preserves adaptability">Preserves adaptability</label>
+<label class="guided-check"><input type="checkbox" value="Removes an existing use">Removes an existing use</label>
+<label class="guided-check"><input type="checkbox" value="Makes reversal costly">Makes reversal costly</label>
+<label class="guided-check"><input type="checkbox" value="May be effectively permanent">May be effectively permanent</label>
+</details>
+<div class="guided-selected" id="guidedSelected">No selections yet.</div>
+<button type="button" class="primary" onclick="guidedInsert()">Insert selected items</button>
+<button type="button" onclick="guidedClear()">Clear selections</button>
+</div>
+<div class="page">
+<div class="actions no-print">
+<button class="primary" onclick="prepareResearch()">1. Prepare Research Document</button>
+<button onclick="window.print()">2. Print / Save as PDF</button>
+<button onclick="copyPrompt()">Copy AI Research Prompt</button>
+<button onclick="loadExample()">Load 1214 Soquel example</button>
+<button onclick="clearAll()">Clear</button>
+</div>
+
+<h1>PROPERTY RISK, VALUE &amp; OPTIONS MAP</h1>
+<p class="subtitle">A Civic Flow Chart research tool for understanding what exists before deciding what should happen next</p>
+
+<div class="notice">
+<strong>Core question:</strong> Before asking “What should we build?”, ask:
+<strong>“What exactly are we inheriting, what does it cost to keep it, what does it cost to change it, what value does it already provide, who carries each risk, and which choices become harder afterward?”</strong>
+</div>
+
+<p>This is a public working tool. It is not a property appraisal, legal opinion, engineering report, environmental assessment, or government determination. Its job is to organize questions and evidence so that different people can inspect the same problem.</p>
+<div class="box no-print"><strong>How to use it:</strong> Load an example or enter your information → click <strong>1. Prepare Research Document</strong> → review the generated research record → click <strong>2. Print / Save as PDF</strong>. The AI prompt can be copied separately when you want an AI research assistant to investigate the questions.</div>
+
+<h2>1. Start with the property</h2>
+<div class="grid">
+<div class="field"><label>Property / project name</label><input id="name" placeholder="Example: 1214 Soquel Avenue"></div>
+<div class="field"><label>Address / parcel identifier</label><input id="address" placeholder="Address, APN, project number, etc."></div>
+</div>
+<div class="grid">
+<div class="field"><label>Jurisdiction</label><input id="jurisdiction" placeholder="City / County / State"></div>
+<div class="field"><label>Date researched</label><input id="date" type="date"></div>
+</div>
+<div class="field"><label>What are we trying to understand?</label><textarea id="purpose" placeholder="State the question without assuming the answer."></textarea></div>
+
+<h2>2. The research method</h2>
+<div class="box">
+<p><strong>Listen → Record → Verify → Ask → Understand → Compare → Decide</strong></p>
+<p>Keep these categories separate:</p>
+<ul>
+<li><strong>Reported:</strong> someone says this is true.</li>
+<li><strong>Documented:</strong> a source records it.</li>
+<li><strong>Verified:</strong> the source was opened and actually supports the statement.</li>
+<li><strong>Estimate:</strong> a calculation or professional judgment that may change.</li>
+<li><strong>Interpretation:</strong> a reasonable reading that is not itself a primary fact.</li>
+<li><strong>Disputed / unresolved:</strong> evidence or interpretations differ, or the answer is not yet established.</li>
+</ul>
+<p><strong>Finding a source is not the same thing as checking the source.</strong></p>
+</div>
+
+<div class="stage">
+<h2>3. Property history</h2>
+<p>Investigate the parcel like a complex contracting job: trace what can be traced, record where the trail stops, and distinguish the history of the land from the history of the current proposal.</p>
+<div class="field"><label>What can we establish about the parcel's history?</label><textarea id="history"></textarea></div>
+<div class="field"><label>Previous uses, buildings, permits, changes, ownership or development history</label><textarea id="uses"></textarea></div>
+<div class="field"><label>Sources and research trail</label><textarea id="historySources" placeholder="Official records, GIS, permits, assessor records, maps, archives, interviews, specialist sources, etc."></textarea></div>
+</div>
+
+<div class="stage">
+<h2>4. Existing condition &amp; physical risk</h2>
+<div class="field"><label>What is actually known about the existing buildings/site?</label><textarea id="condition"></textarea></div>
+<div class="field"><label>Known or suspected structural, seismic, fire/life-safety, accessibility, utility, drainage, environmental or maintenance issues</label><textarea id="physical"></textarea></div>
+<div class="field"><label>What evidence supports each condition?</label><textarea id="conditionSources"></textarea></div>
+<div class="checks">
+<label><input type="checkbox" id="siteInspected"> Site personally inspected</label>
+<label><input type="checkbox" id="professionalReport"> Professional/technical report located</label>
+<label><input type="checkbox" id="officialRecord"> Official record located</label>
+</div>
+</div>
+
+<div class="stage">
+<h2>5. Legal, financial &amp; contractual conditions</h2>
+<div class="field"><label>Known leases, tenant/business relationships, easements, title issues, contracts, code obligations or legal proceedings</label><textarea id="legal"></textarea></div>
+<div class="field"><label>Who appears to carry each identified obligation or risk?</label><textarea id="riskOwners"></textarea></div>
+<div class="field"><label>Known financial or market constraints — clearly label estimates</label><textarea id="financial"></textarea></div>
+<div class="field"><label>Sources / documents</label><textarea id="legalSources"></textarea></div>
+<p class="small">Do not infer a person's legal liability from a rumor or from the existence of a lawsuit. Identify the actual document, party, claim, order, judgment, contract, or other evidence.</p>
+</div>
+
+<div class="stage">
+<h2>6. Existing value</h2>
+<p>A condition that is costly to an owner can still have value to someone else. Record both sides.</p>
+<table>
+<tr><th>Existing value or function</th><th>Who experiences the value?</th><th>Evidence / source</th><th>What could be lost or changed?</th></tr>
+<tr><td><textarea class="short" data-table="1"></textarea></td><td><textarea class="short" data-table="2"></textarea></td><td><textarea class="short" data-table="3"></textarea></td><td><textarea class="short" data-table="4"></textarea></td></tr>
+<tr><td><textarea class="short" data-table="5"></textarea></td><td><textarea class="short" data-table="6"></textarea></td><td><textarea class="short" data-table="7"></textarea></td><td><textarea class="short" data-table="8"></textarea></td></tr>
+<tr><td><textarea class="short" data-table="9"></textarea></td><td><textarea class="short" data-table="10"></textarea></td><td><textarea class="short" data-table="11"></textarea></td><td><textarea class="short" data-table="12"></textarea></td></tr>
+</table>
+</div>
+
+<div class="stage">
+<h2>7. Options before choosing an outcome</h2>
+<p>Do not assume the only choices are “build” or “do nothing.” Record the actual alternatives that can be researched.</p>
+<div class="field"><label>Option A — retain / repair / rehabilitate</label><textarea id="optionA"></textarea></div>
+<div class="field"><label>Option B — modify / partial redevelopment</label><textarea id="optionB"></textarea></div>
+<div class="field"><label>Option C — replacement / new development</label><textarea id="optionC"></textarea></div>
+<div class="field"><label>Other plausible options</label><textarea id="optionD"></textarea></div>
+<div class="field"><label>What would each option require, cost, protect, risk, or make harder later?</label><textarea id="optionCompare"></textarea></div>
+</div>
+
+<div class="stage">
+<h2>8. Civic authority &amp; process</h2>
+<div class="grid">
+<div class="field"><label>Who can answer or verify the key facts?</label><textarea id="verifier"></textarea></div>
+<div class="field"><label>Who actually makes each decision?</label><textarea id="decider"></textarea></div>
+</div>
+<div class="field"><label>Applicable laws, plans, zoning, objective standards, permits or other rules</label><textarea id="rules"></textarea></div>
+<div class="field"><label>What is required, optional, proposed, contested, or unknown?</label><textarea id="status"></textarea></div>
+<div class="field"><label>What procedural steps remain, and what are their clocks?</label><textarea id="clock"></textarea></div>
+</div>
+
+<div class="stage">
+<h2>9. Future flexibility</h2>
+<div class="field"><label>What choices would each option create for future residents, owners, businesses, or government?</label><textarea id="futureCreate"></textarea></div>
+<div class="field"><label>What choices would each option eliminate or make significantly harder?</label><textarea id="futureLose"></textarea></div>
+<div class="field"><label>Which consequences are reversible, difficult to reverse, or effectively permanent?</label><textarea id="reversibility"></textarea></div>
+</div>
+
+<div class="stage">
+<h2>10. Source audit</h2>
+<div class="checks">
+<label><input type="checkbox"> Primary sources were sought where available</label>
+<label><input type="checkbox"> Important sources were opened and read</label>
+<label><input type="checkbox"> Claims were checked against the source</label>
+<label><input type="checkbox"> Facts were separated from estimates and interpretations</label>
+<label><input type="checkbox"> Conflicting evidence was recorded instead of silently resolved</label>
+<label><input type="checkbox"> Personal/private information was not unnecessarily reproduced</label>
+<label><input type="checkbox"> Current status and dates were checked</label>
+</div>
+<div class="field"><label>Important unresolved questions</label><textarea id="unknowns"></textarea></div>
+<div class="field"><label>Corrections / things we discovered were wrong or incomplete</label><textarea id="corrections"></textarea></div>
+</div>
+
+<div class="pagebreak"></div>
+<h2>11. AI research prompt</h2>
+<p>This prompt is generated from the information above. It can be pasted into another AI system if someone chooses to use one. The AI is a research assistant, not the authority.</p>
+<textarea id="prompt" class="prompt" readonly></textarea>
+<div class="box">
+<strong>Important:</strong> Any AI-generated answer should be treated as preliminary until the underlying sources are opened and checked. The authoritative source—not the AI—is what establishes a fact.
+</div>
+
+<h2>12. Finished research summary</h2>
+<div id="readyMessage" class="notice no-print" style="display:none"><strong>Research document prepared.</strong> Review the record below. When you are ready, use <strong>Print / Save as PDF</strong> at the top.</div>
+<div class="field"><label>What we currently know</label><textarea id="summaryKnow"></textarea></div>
+<div class="field"><label>What we do not yet know</label><textarea id="summaryUnknown"></textarea></div>
+<div class="field"><label>What different participants may reasonably value or be concerned about</label><textarea id="summaryViews"></textarea></div>
+<div class="field"><label>What should be investigated next</label><textarea id="summaryNext"></textarea></div>
+
+<h2>13. Why this example exists</h2>
+<p>This tool grew out of a Civic Flow Chart test involving 1214 Soquel Avenue in Santa Cruz. The purpose of the test was not to decide the project's outcome. It was to ask whether the same research method used to investigate a complicated contracting/property problem could help residents, property owners, developers, public agencies, and other participants understand the same underlying system.</p>
+<p>The test asks a simple systems question:</p>
+<div class="notice"><strong>When different people have different interests in the same property, can we map the facts, risks, values, authorities, costs, time, and remaining choices without requiring everyone to agree?</strong></div>
+<p>The framework is portable. A different person can use this page for a different parcel, project, neighborhood, public facility, or redevelopment question.</p>
+
+<div class="footer">
+<strong>Civic Flow Chart — open working tool.</strong><br>
+This page does not speak for the City of Santa Cruz, Santa Cruz County, Workbench, property owners, residents, or any other organization. A completed map is an individual research record unless the people involved explicitly establish another status. Verify current information against authoritative sources before relying on it.
+</div>
+</div>
+
+<script>
+const ids=["name","address","jurisdiction","date","purpose","history","uses","historySources","condition","physical","conditionSources","legal","riskOwners","financial","legalSources","optionA","optionB","optionC","optionD","optionCompare","verifier","decider","rules","status","clock","futureCreate","futureLose","reversibility","unknowns","corrections","summaryKnow","summaryUnknown","summaryViews","summaryNext"];
+function val(id){const e=document.getElementById(id);return e?e.value.trim():"";}
+function checked(id){const e=document.getElementById(id);return e&&e.checked?"Yes":"No";}
+function buildPrompt(){
+const n=val("name")||"[property/project]";
+const promptText = `You are assisting with a neutral civic/property research project called “Property Risk, Value & Options Map.”
+
+SUBJECT
+Property/project: ${n}
+Address/identifier: ${val("address")}
+Jurisdiction: ${val("jurisdiction")}
+Research purpose: ${val("purpose")}
+
+METHOD
+Do not decide whether the property should be developed, preserved, demolished, purchased, or left unchanged. Do not rank the options. Investigate the questions below and distinguish:
+- documented facts
+- reported claims
+- estimates
+- interpretations
+- disputed points
+- unknown / not yet verified
+
+Use primary and authoritative sources where available. Give the exact source title, issuing body, date, and link. Open/check the source rather than relying on search snippets. If a source does not establish a claim, say so.
+
+RESEARCH QUESTIONS
+1. What is the documented history of this parcel?
+2. What buildings and uses exist or existed?
+3. What is actually documented about current physical condition?
+4. What structural, seismic, fire/life-safety, accessibility, utility, drainage, environmental, or maintenance issues are documented?
+5. What leases, easements, contracts, title issues, code obligations, or legal proceedings are documented?
+6. Who appears to carry each identified obligation or risk, and what source establishes that?
+7. What existing value or function does the property provide to different people?
+8. What alternatives to the current proposal can be identified?
+9. What rules and objective standards apply?
+10. Who can verify facts, and who actually has decision authority?
+11. What time limits, procedural steps, and deadlines apply?
+12. Which consequences of each option are reversible, difficult to reverse, or effectively permanent?
+13. What important questions remain unanswered?
+
+CURRENT WORKING NOTES
+History: ${val("history")}
+Previous uses: ${val("uses")}
+History sources: ${val("historySources")}
+Existing condition: ${val("condition")}
+Physical issues: ${val("physical")}
+Condition sources: ${val("conditionSources")}
+Legal/contractual: ${val("legal")}
+Risk holders: ${val("riskOwners")}
+Financial constraints/estimates: ${val("financial")}
+Legal sources: ${val("legalSources")}
+Option A: ${val("optionA")}
+Option B: ${val("optionB")}
+Option C: ${val("optionC")}
+Other options: ${val("optionD")}
+Option comparison: ${val("optionCompare")}
+Fact verifier: ${val("verifier")}
+Decision-maker: ${val("decider")}
+Rules: ${val("rules")}
+Process/status: ${val("status")}
+Clock: ${val("clock")}
+Future choices created: ${val("futureCreate")}
+Future choices lost/hardened: ${val("futureLose")}
+Reversibility: ${val("reversibility")}
+Known unknowns: ${val("unknowns")}
+
+OUTPUT
+Return a concise research record with:
+A. Property history
+B. Existing condition
+C. Liabilities/constraints
+D. Existing assets/values
+E. Legal/contractual conditions
+F. Alternatives
+G. Authority and process
+H. Future flexibility
+I. Source audit
+J. Unresolved questions
+K. Suggested next research steps
+
+For every important factual claim, identify the source. Never present an unverified statement as fact. If evidence is unavailable, write “not verified.”`;
+document.getElementById("prompt").value=promptText;
+return promptText;
+}
+document.querySelectorAll("input,textarea,select").forEach(e=>e.addEventListener("input",buildPrompt));
+function prepareResearch(){
+  buildPrompt();
+  const n=val("name")||"Unnamed property/project";
+  const summary=[
+    "PROPERTY / PROJECT: "+n,
+    "ADDRESS / IDENTIFIER: "+val("address"),
+    "JURISDICTION: "+val("jurisdiction"),
+    "RESEARCH DATE: "+val("date"),
+    "",
+    "PURPOSE: "+val("purpose"),
+    "",
+    "CURRENT KNOWLEDGE",
+    "History: "+val("history"),
+    "Previous uses: "+val("uses"),
+    "Existing condition: "+val("condition"),
+    "Physical issues: "+val("physical"),
+    "Legal / contractual: "+val("legal"),
+    "Risk holders: "+val("riskOwners"),
+    "Financial constraints / estimates: "+val("financial"),
+    "",
+    "EXISTING VALUE",
+    Array.from(document.querySelectorAll("[data-table]")).map(e=>e.value.trim()).filter(Boolean).join(" | "),
+    "",
+    "OPTIONS",
+    "A — Retain / repair / rehabilitate: "+val("optionA"),
+    "B — Modify / partial redevelopment: "+val("optionB"),
+    "C — Replacement / new development: "+val("optionC"),
+    "Other: "+val("optionD"),
+    "Comparison: "+val("optionCompare"),
+    "",
+    "AUTHORITY & PROCESS",
+    "Who can verify: "+val("verifier"),
+    "Who decides: "+val("decider"),
+    "Rules: "+val("rules"),
+    "Status: "+val("status"),
+    "Clock: "+val("clock"),
+    "",
+    "FUTURE FLEXIBILITY",
+    "Choices created: "+val("futureCreate"),
+    "Choices lost / made harder: "+val("futureLose"),
+    "Reversibility: "+val("reversibility"),
+    "",
+    "UNRESOLVED / CORRECTIONS",
+    "Unknowns: "+val("unknowns"),
+    "Corrections: "+val("corrections"),
+    "",
+    "NEXT STEP: "+val("summaryNext")
+  ].join("\n");
+  document.getElementById("summaryKnow").value=summary;
+  document.getElementById("summaryUnknown").value=val("unknowns");
+  document.getElementById("summaryViews").value=val("summaryViews");
+  document.getElementById("readyMessage").style.display="block";
+  document.getElementById("readyMessage").scrollIntoView({behavior:"smooth",block:"start"});
+}
+function copyPrompt(){buildPrompt();navigator.clipboard.writeText(document.getElementById("prompt").value).then(()=>alert("AI research prompt copied."));}
+
+function sectionTextFromHeading(h2){
+  const wrapper=document.createElement("div");
+  wrapper.appendChild(h2.cloneNode(true));
+  const inStage=h2.parentElement && h2.parentElement.classList.contains("stage");
+  let node=h2.nextElementSibling;
+  while(node){
+    if(inStage ? node.classList.contains("stage") : (node.tagName==="H2" || node.classList.contains("stage"))) break;
+    wrapper.appendChild(node.cloneNode(true));
+    node=node.nextElementSibling;
+  }
+  wrapper.querySelectorAll(".section-actions,.copy-all").forEach(e=>e.remove());
+  wrapper.querySelectorAll("textarea").forEach(e=>{const p=document.createElement("p");p.textContent=e.value||"";e.replaceWith(p);});
+  wrapper.querySelectorAll("input").forEach(e=>{
+    const p=document.createElement("p");
+    if(e.type==="checkbox") p.textContent=(e.checked?"[x] ":"[ ] ")+(e.parentElement?e.parentElement.textContent.trim():"");
+    else p.textContent=e.value||"";
+    e.replaceWith(p);
+  });
+  wrapper.querySelectorAll("select").forEach(e=>{const p=document.createElement("p");p.textContent=e.value||"";e.replaceWith(p);});
+  return wrapper.innerText.replace(/\n{3,}/g,"\n\n").trim();
+}
+async function copyText(textValue, message){
+  try{
+    if(!textValue.trim()) throw new Error("Nothing to copy");
+    await navigator.clipboard.writeText(textValue);
+    alert(message);
+  }catch(err){
+    const ta=document.createElement("textarea");
+    ta.value=textValue;document.body.appendChild(ta);ta.select();
+    try{document.execCommand("copy");alert(message);}catch(e){alert("Copy did not work. You can select the text manually.");}
+    ta.remove();
+  }
+}
+function addSectionCopyButtons(){
+  document.querySelectorAll(".page > h2, .page > .stage > h2").forEach((h2)=>{
+    if(h2.nextElementSibling && h2.nextElementSibling.querySelector && h2.nextElementSibling.querySelector(".section-copy")) return;
+    const actions=document.createElement("div");
+    actions.className="section-actions no-print";
+    const b=document.createElement("button");
+    b.className="section-copy";
+    b.type="button";
+    b.textContent="Copy this section";
+    b.onclick=()=>{
+      const text=sectionTextFromHeading(h2);
+      copyText(text, "Section "+h2.textContent.trim()+" copied.");
+    };
+    actions.appendChild(b);
+    h2.insertAdjacentElement("afterend",actions);
+  });
+  const aiHeading=Array.from(document.querySelectorAll(".page > h2")).find(h=>h.textContent.trim().startsWith("11."));
+  if(aiHeading && !document.getElementById("copyAISection")){
+    const b=document.createElement("button");
+    b.id="copyAISection";b.className="copy-all no-print";b.type="button";
+    b.textContent="Copy AI Research Prompt";
+    b.onclick=()=>{buildPrompt();copyText(document.getElementById("prompt").value,"AI research prompt copied.");};
+    aiHeading.insertAdjacentElement("afterend",b);
+  }
+  const summaryHeading=Array.from(document.querySelectorAll(".page > h2")).find(h=>h.textContent.trim().startsWith("12."));
+  if(summaryHeading && !document.getElementById("copyAllRecord")){
+    const b=document.createElement("button");
+    b.id="copyAllRecord";b.className="copy-all no-print";b.type="button";
+    b.textContent="Copy Entire Research Record";
+    b.onclick=()=>{
+      const text=Array.from(document.querySelectorAll(".page > h2, .page > .stage > h2"))
+        .filter(h=>/^([1-9]|1[0-3])\./.test(h.textContent.trim()))
+        .map(sectionTextFromHeading).join("\n\n");
+      copyText(text,"Entire research record copied.");
+    };
+    summaryHeading.insertAdjacentElement("afterend",b);
+  }
+}
+function buildPrintView(){
+  let old=document.getElementById("printView");
+  if(old) old.remove();
+  const source=document.querySelector(".page");
+  const clone=source.cloneNode(true);
+  clone.classList.add("print-page");
+  clone.querySelectorAll(".no-print,.section-actions,.copy-all,.actions").forEach(e=>e.remove());
+  clone.querySelectorAll("textarea").forEach(e=>{const p=document.createElement("div");p.className="print-field-value";p.textContent=e.value||"";e.replaceWith(p);});
+  clone.querySelectorAll("input").forEach(e=>{const p=document.createElement("div");p.className="print-field-value";if(e.type==="checkbox")p.textContent=(e.checked?"[x] ":"[ ] ")+(e.parentElement?e.parentElement.textContent.trim():"");else p.textContent=e.value||"";e.replaceWith(p);});
+  clone.querySelectorAll("select").forEach(e=>{const p=document.createElement("div");p.className="print-field-value";p.textContent=e.options[e.selectedIndex]?.text||e.value||"";e.replaceWith(p);});
+  old=document.createElement("div"); old.id="printView"; old.appendChild(clone); document.body.appendChild(old);
+}
+window.addEventListener("beforeprint",()=>{buildPrintView();document.body.classList.add("printing");});
+window.addEventListener("afterprint",()=>{document.body.classList.remove("printing");const p=document.getElementById("printView");if(p)p.remove();});
+
+function clearAll(){if(confirm("Clear this research record?")){document.querySelectorAll("input,textarea").forEach(e=>{if(e.type==="checkbox")e.checked=false;else e.value=""});document.getElementById("date").value=new Date(Date.now()-new Date().getTimezoneOffset()*60000).toISOString().slice(0,10);document.getElementById("prompt").value="";document.getElementById("readyMessage").style.display="none";}}
+function loadExample(){
+document.getElementById("name").value="1214 Soquel Avenue / Seabright Plaza";
+document.getElementById("address").value="1214 Soquel Avenue, Santa Cruz, California";
+document.getElementById("jurisdiction").value="City of Santa Cruz, Santa Cruz County, California";
+document.getElementById("purpose").value="Demonstration case: investigate the property's history, existing conditions, liabilities, existing values, applicable civic rules, redevelopment options, and future flexibility without deciding the project's outcome.";
+document.getElementById("history").value="Begin with City project records, parcel/GIS records, permits, assessor/property records, historical maps, and other authoritative sources. Record what can actually be established.";
+document.getElementById("uses").value="Current site includes existing buildings and commercial uses reported by community members. Verify each use, lease/ownership relationship, and building history independently.";
+document.getElementById("historySources").value="City of Santa Cruz project page; City eTRAKiT; official parcel/permit records; additional records to be researched.";
+document.getElementById("condition").value="Community/property-owner statements about building condition should be treated as claims until supported by inspection reports, permits, code records, engineering reports, or other evidence.";
+document.getElementById("physical").value="Research structural, seismic, fire/life-safety, accessibility, utility, drainage/stormwater, environmental, maintenance, and other documented site conditions.";
+document.getElementById("conditionSources").value="To be researched and audited.";
+document.getElementById("legal").value="Research leases, ownership, easements, contracts, permits, code obligations, and any relevant litigation or administrative proceedings. Do not infer liability from allegations.";
+document.getElementById("riskOwners").value="Map each documented obligation to the party identified by the source. Distinguish owner, tenant, applicant, City, County, state agency, and other roles.";
+document.getElementById("financial").value="Do not estimate rehabilitation or redevelopment economics without identifying the assumptions and source. Separate market claims from documented costs.";
+document.getElementById("legalSources").value="Official City/County records and court or agency records where applicable.";
+document.getElementById("optionA").value="Research retention, repair, or rehabilitation of existing buildings and uses.";
+document.getElementById("optionB").value="Research partial redevelopment, adaptive reuse, or a modified project.";
+document.getElementById("optionC").value="Research the current replacement/new-development concept as documented by the applicant and City.";
+document.getElementById("optionD").value="Record any other legally and physically plausible alternatives identified by qualified sources.";
+document.getElementById("optionCompare").value="Compare requirements, costs, risks, existing values, housing/community effects, time, and future flexibility without ranking the options.";
+document.getElementById("verifier").value="City Planning / relevant City departments for City records and process; property/applicant representatives for project-specific information; qualified professionals for technical conditions; other official custodians for specialized records.";
+document.getElementById("decider").value="Identify the actual decision-maker for each entitlement or approval after the formal application and applicable process are established. Do not assume a particular commission or council decides every issue.";
+document.getElementById("rules").value="Research applicable zoning/objective standards, state housing law, local plans, permits, CEQA requirements, and other applicable rules from authoritative sources.";
+document.getElementById("status").value="City records currently describe the 1214 concepts as SB330-only preapplications and preliminary massing concepts; verify current status before relying on this record.";
+document.getElementById("clock").value="Research the applicable preapplication/formal-application deadlines, review periods, hearing requirements, and other legal versus estimated clocks.";
+document.getElementById("futureCreate").value="Document future housing, commercial, public-space, transportation, economic, or other choices created by each alternative.";
+document.getElementById("futureLose").value="Document existing uses, physical configurations, affordability/business arrangements, or other choices that could become harder or impossible to restore.";
+document.getElementById("reversibility").value="Classify consequences as reversible, costly to reverse, or effectively permanent based on evidence—not rhetoric.";
+document.getElementById("unknowns").value="What is the documented condition of the existing buildings? What obligations are attached to the property? What alternatives are legally/physically feasible? Which decisions remain? What existing values have not yet been documented?";
+document.getElementById("summaryNext").value="Open and audit the underlying City, property, legal, technical, and historical sources before drawing conclusions.";
+buildPrompt();
+window.scrollTo({top:0,behavior:"smooth"});
+}
+document.getElementById("date").value=new Date(Date.now()-new Date().getTimezoneOffset()*60000).toISOString().slice(0,10);
+document.getElementById("prompt").value="";
+addSectionCopyButtons();
+
+function guidedItems(){return Array.from(document.querySelectorAll(".guided-panel input[type=checkbox]:checked")).map(e=>e.value);}
+function guidedInsert(){
+ const target=document.getElementById(document.getElementById("guidedTarget").value),items=guidedItems();
+ if(!target)return;
+ if(!items.length){alert("Choose one or more items first.");return;}
+ target.value=(target.value.trim()?target.value.trim()+"\n":"")+items.map(x=>"• "+x).join("\n");
+ target.dispatchEvent(new Event("input",{bubbles:true}));
+ guidedClear();
+}
+function guidedClear(){
+ document.querySelectorAll(".guided-panel input[type=checkbox]").forEach(e=>e.checked=false);
+ document.getElementById("guidedSelected").textContent="No selections yet.";
+}
+document.addEventListener("change",e=>{
+ if(e.target.matches(".guided-panel input[type=checkbox]")){
+  const items=guidedItems();
+  document.getElementById("guidedSelected").textContent=items.length?items.join(" • "):"No selections yet.";
+ }
+});
+
+function toggleHelp(button){
+ const tip=button.closest(".help-tip");
+ const open=tip.classList.toggle("open");
+ button.setAttribute("aria-expanded",open?"true":"false");
+}
+</script>
+</body>
+</html>
