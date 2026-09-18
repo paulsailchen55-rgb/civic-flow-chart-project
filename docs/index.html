@@ -36,7 +36,8 @@ table{width:100%;border-collapse:collapse;margin:12px 0}th,td{border:1px solid v
 <body>
 <div class="page">
 <div class="actions no-print">
-<button class="primary" onclick="prepareResearch()">1. Prepare Research Document</button>
+<button class="primary" id="prepareBtn" onclick="prepareResearch()">1. Prepare Research Document</button>
+<button type="button" id="promptCounter" title="Counts research-prompt preparation/copy passes">Prompt responses: 0</button>
 <button onclick="window.print()">2. Print / Save as PDF</button>
 <button onclick="copyPrompt()">Copy AI Research Prompt</button>
 <button onclick="loadExample()">Load 1214 Soquel example</button>
@@ -112,11 +113,10 @@ table{width:100%;border-collapse:collapse;margin:12px 0}th,td{border:1px solid v
 <div class="stage">
 <h2>6. Existing value</h2>
 <p>A condition that is costly to an owner can still have value to someone else. Record both sides.</p>
-<table>
-<tr><th>Existing value or function</th><th>Who experiences the value?</th><th>Evidence / source</th><th>What could be lost or changed?</th></tr>
-<tr><td><textarea class="short" data-table="1"></textarea></td><td><textarea class="short" data-table="2"></textarea></td><td><textarea class="short" data-table="3"></textarea></td><td><textarea class="short" data-table="4"></textarea></td></tr>
+<table id="section6Table"><thead><tr><th>Existing value or function</th><th>Who experiences the value?</th><th>Evidence / source</th><th>What could be lost or changed?</th></tr>
+<tbody><tr><td><textarea class="short" data-table="1"></textarea></td><td><textarea class="short" data-table="2"></textarea></td><td><textarea class="short" data-table="3"></textarea></td><td><textarea class="short" data-table="4"></textarea></td></tr>
 <tr><td><textarea class="short" data-table="5"></textarea></td><td><textarea class="short" data-table="6"></textarea></td><td><textarea class="short" data-table="7"></textarea></td><td><textarea class="short" data-table="8"></textarea></td></tr>
-<tr><td><textarea class="short" data-table="9"></textarea></td><td><textarea class="short" data-table="10"></textarea></td><td><textarea class="short" data-table="11"></textarea></td><td><textarea class="short" data-table="12"></textarea></td></tr>
+<tr><td><textarea class="short" data-table="9"></textarea></td><td><textarea class="short" data-table="10"></textarea></td><td><textarea class="short" data-table="11"></textarea></td><td><textarea class="short" data-table="12"></textarea></td></tr></tbody>
 </table>
 </div>
 
@@ -151,13 +151,13 @@ table{width:100%;border-collapse:collapse;margin:12px 0}th,td{border:1px solid v
 <div class="stage">
 <h2>10. Source audit</h2>
 <div class="checks">
-<label><input type="checkbox"> Primary sources were sought where available</label>
-<label><input type="checkbox"> Important sources were opened and read</label>
-<label><input type="checkbox"> Claims were checked against the source</label>
-<label><input type="checkbox"> Facts were separated from estimates and interpretations</label>
-<label><input type="checkbox"> Conflicting evidence was recorded instead of silently resolved</label>
-<label><input type="checkbox"> Personal/private information was not unnecessarily reproduced</label>
-<label><input type="checkbox"> Current status and dates were checked</label>
+<label><input type="checkbox" id="auditPrimary"> Primary sources were sought where available</label>
+<label><input type="checkbox" id="auditOpened"> Important sources were opened and read</label>
+<label><input type="checkbox" id="auditClaims"> Claims were checked against the source</label>
+<label><input type="checkbox" id="auditFacts"> Facts were separated from estimates and interpretations</label>
+<label><input type="checkbox" id="auditConflicts"> Conflicting evidence was recorded instead of silently resolved</label>
+<label><input type="checkbox" id="auditPrivacy"> Personal/private information was not unnecessarily reproduced</label>
+<label><input type="checkbox" id="auditCurrent"> Current status and dates were checked</label>
 </div>
 <div class="field"><label>Important unresolved questions</label><textarea id="unknowns"></textarea></div>
 <div class="field"><label>Corrections / things we discovered were wrong or incomplete</label><textarea id="corrections"></textarea></div>
@@ -191,17 +191,31 @@ This page does not speak for the City of Santa Cruz, Santa Cruz County, Workbenc
 </div>
 
 <script>
-const ids=["name","address","jurisdiction","date","purpose","history","uses","historySources","condition","physical","conditionSources","legal","riskOwners","financial","legalSources","optionA","optionB","optionC","optionD","optionCompare","verifier","decider","rules","status","clock","futureCreate","futureLose","reversibility","unknowns","corrections","summaryKnow","summaryUnknown","summaryViews","summaryNext"];
+const AUDIT_IDS=["auditPrimary","auditOpened","auditClaims","auditFacts","auditConflicts","auditPrivacy","auditCurrent"];
+const PROMPT_COUNTER_KEY="civicFlowPromptResponseCount";
+const today=()=>new Date(Date.now()-new Date().getTimezoneOffset()*60000).toISOString().slice(0,10);
 function val(id){const e=document.getElementById(id);return e?e.value.trim():"";}
-function checked(id){const e=document.getElementById(id);return e&&e.checked?"Yes":"No";}
+function checked(id){const e=document.getElementById(id);return !!(e&&e.checked);}
+function auditSummary(){
+  return AUDIT_IDS.map(id=>{const e=document.getElementById(id);return e&&e.parentElement?((e.checked?"[x] ":"[ ] ")+e.parentElement.textContent.trim().replace(/^\[x\]\s*|^\[\]\s*/,"")):"";}).join("\n");
+}
+function getCounter(){return Number(localStorage.getItem(PROMPT_COUNTER_KEY)||"0")||0;}
+function setCounter(n){localStorage.setItem(PROMPT_COUNTER_KEY,String(n));const b=document.getElementById("promptCounter");if(b)b.textContent="Prompt responses: "+n;}
+function incrementCounter(){const n=getCounter()+1;setCounter(n);return n;}
+
 function buildPrompt(){
-const n=val("name")||"[property/project]";
-const promptText = `You are assisting with a neutral civic/property research project called “Property Risk, Value & Options Map.”
+  const n=val("name")||"[property/project]";
+  const valueRows=Array.from(document.querySelectorAll("#section6Table tbody tr")).map((tr,i)=>{
+    const cells=Array.from(tr.querySelectorAll("textarea")).map(e=>e.value.trim());
+    return "Value "+(i+1)+":\n  Existing value/function: "+(cells[0]||"[not entered]")+"\n  Who experiences the value?: "+(cells[1]||"[not entered]")+"\n  Evidence/source: "+(cells[2]||"[not entered]")+"\n  What could be lost or changed?: "+(cells[3]||"[not entered]");
+  }).join("\n");
+  const promptText=`You are assisting with a neutral civic/property research project called “Property Risk, Value & Options Map.”
 
 SUBJECT
 Property/project: ${n}
 Address/identifier: ${val("address")}
 Jurisdiction: ${val("jurisdiction")}
+Research date: ${val("date")}
 Research purpose: ${val("purpose")}
 
 METHOD
@@ -237,24 +251,37 @@ History sources: ${val("historySources")}
 Existing condition: ${val("condition")}
 Physical issues: ${val("physical")}
 Condition sources: ${val("conditionSources")}
-Legal/contractual: ${val("legal")}
+Legal / contractual: ${val("legal")}
 Risk holders: ${val("riskOwners")}
-Financial constraints/estimates: ${val("financial")}
+Financial constraints / estimates: ${val("financial")}
 Legal sources: ${val("legalSources")}
-Option A: ${val("optionA")}
-Option B: ${val("optionB")}
-Option C: ${val("optionC")}
+
+EXISTING VALUE
+${valueRows}
+
+OPTIONS
+A — Retain / repair / rehabilitate: ${val("optionA")}
+B — Modify / partial redevelopment: ${val("optionB")}
+C — Replacement / new development: ${val("optionC")}
 Other options: ${val("optionD")}
-Option comparison: ${val("optionCompare")}
-Fact verifier: ${val("verifier")}
-Decision-maker: ${val("decider")}
+Comparison: ${val("optionCompare")}
+
+AUTHORITY & PROCESS
+Who can verify: ${val("verifier")}
+Who decides: ${val("decider")}
 Rules: ${val("rules")}
-Process/status: ${val("status")}
+Status: ${val("status")}
 Clock: ${val("clock")}
-Future choices created: ${val("futureCreate")}
-Future choices lost/hardened: ${val("futureLose")}
+
+FUTURE FLEXIBILITY
+Choices created: ${val("futureCreate")}
+Choices lost / made harder: ${val("futureLose")}
 Reversibility: ${val("reversibility")}
-Known unknowns: ${val("unknowns")}
+
+SOURCE AUDIT
+${auditSummary()}
+Unresolved questions: ${val("unknowns")}
+Corrections / incomplete discoveries: ${val("corrections")}
 
 OUTPUT
 Return a concise research record with:
@@ -271,10 +298,24 @@ J. Unresolved questions
 K. Suggested next research steps
 
 For every important factual claim, identify the source. Never present an unverified statement as fact. If evidence is unavailable, write “not verified.”`;
-document.getElementById("prompt").value=promptText;
-return promptText;
+  const prompt=document.getElementById("prompt"); if(prompt)prompt.value=promptText;
+  return promptText;
 }
-document.querySelectorAll("input,textarea,select").forEach(e=>e.addEventListener("input",buildPrompt));
+
+function tableRowsText(){
+  return Array.from(document.querySelectorAll("#section6Table tbody tr")).map((tr,i)=>{
+    const c=Array.from(tr.querySelectorAll("textarea")).map(e=>e.value.trim());
+    if(!c.some(Boolean)) return "Value "+(i+1)+": [not entered]";
+    return [
+      "Value "+(i+1),
+      "  Existing value/function: "+(c[0]||"[not entered]"),
+      "  Who experiences the value?: "+(c[1]||"[not entered]"),
+      "  Evidence/source: "+(c[2]||"[not entered]"),
+      "  What could be lost or changed?: "+(c[3]||"[not entered]")
+    ].join("\n");
+  }).join("\n");
+}
+
 function prepareResearch(){
   buildPrompt();
   const n=val("name")||"Unnamed property/project";
@@ -286,17 +327,20 @@ function prepareResearch(){
     "",
     "PURPOSE: "+val("purpose"),
     "",
-    "CURRENT KNOWLEDGE",
+    "CURRENT WORKING RECORD",
     "History: "+val("history"),
     "Previous uses: "+val("uses"),
+    "History sources: "+val("historySources"),
     "Existing condition: "+val("condition"),
     "Physical issues: "+val("physical"),
+    "Condition sources: "+val("conditionSources"),
     "Legal / contractual: "+val("legal"),
     "Risk holders: "+val("riskOwners"),
     "Financial constraints / estimates: "+val("financial"),
+    "Legal sources: "+val("legalSources"),
     "",
     "EXISTING VALUE",
-    Array.from(document.querySelectorAll("[data-table]")).map(e=>e.value.trim()).filter(Boolean).join(" | "),
+    tableRowsText(),
     "",
     "OPTIONS",
     "A — Retain / repair / rehabilitate: "+val("optionA"),
@@ -317,300 +361,132 @@ function prepareResearch(){
     "Choices lost / made harder: "+val("futureLose"),
     "Reversibility: "+val("reversibility"),
     "",
+    "SOURCE AUDIT",
+    auditSummary(),
+    "",
     "UNRESOLVED / CORRECTIONS",
     "Unknowns: "+val("unknowns"),
     "Corrections: "+val("corrections"),
     "",
-    "NEXT STEP: "+val("summaryNext")
+    "RESEARCHER-ENTERED NEXT STEP: "+val("summaryNext")
   ].join("\n");
   document.getElementById("summaryKnow").value=summary;
   document.getElementById("summaryUnknown").value=val("unknowns");
-  document.getElementById("summaryViews").value=val("summaryViews");
+  if(!val("summaryViews")) document.getElementById("summaryViews").value="No participant/value synthesis entered yet. Do not infer one from the research record.";
+  if(!val("summaryNext")) document.getElementById("summaryNext").value="Identify the highest-priority unresolved questions and open the underlying authoritative sources.";
+  incrementCounter();
   document.getElementById("readyMessage").style.display="block";
   document.getElementById("readyMessage").scrollIntoView({behavior:"smooth",block:"start"});
-}
-function copyPrompt(){buildPrompt();navigator.clipboard.writeText(document.getElementById("prompt").value).then(()=>alert("AI research prompt copied."));}
-
-function sectionTextFromHeading(h2){
-  const wrapper=document.createElement("div");
-  wrapper.appendChild(h2.cloneNode(true));
-  const inStage=h2.parentElement && h2.parentElement.classList.contains("stage");
-  let node=h2.nextElementSibling;
-  while(node){
-    if(inStage ? node.classList.contains("stage") : node.tagName==="H2") break;
-    wrapper.appendChild(node.cloneNode(true));
-    node=node.nextElementSibling;
-  }
-  wrapper.querySelectorAll(".section-actions,.copy-all").forEach(e=>e.remove());
-  wrapper.querySelectorAll("textarea").forEach(e=>{const p=document.createElement("p");p.textContent=e.value||"";e.replaceWith(p);});
-  wrapper.querySelectorAll("input").forEach(e=>{
-    const p=document.createElement("p");
-    if(e.type==="checkbox") p.textContent=(e.checked?"[x] ":"[ ] ")+(e.parentElement?e.parentElement.textContent.trim():"");
-    else p.textContent=e.value||"";
-    e.replaceWith(p);
-  });
-  wrapper.querySelectorAll("select").forEach(e=>{const p=document.createElement("p");p.textContent=e.value||"";e.replaceWith(p);});
-  return wrapper.innerText.replace(/\n{3,}/g,"\n\n").trim();
-}
-async function copyText(textValue, message){
-  try{
-    if(!textValue.trim()) throw new Error("Nothing to copy");
-    await navigator.clipboard.writeText(textValue);
-    alert(message);
-  }catch(err){
-    const ta=document.createElement("textarea");
-    ta.value=textValue;document.body.appendChild(ta);ta.select();
-    try{document.execCommand("copy");alert(message);}catch(e){alert("Copy did not work. You can select the text manually.");}
-    ta.remove();
-  }
-}
-function addSectionCopyButtons(){
-  document.querySelectorAll(".page > h2, .page > .stage > h2").forEach((h2)=>{
-    if(h2.nextElementSibling && h2.nextElementSibling.querySelector && h2.nextElementSibling.querySelector(".section-copy")) return;
-    const actions=document.createElement("div");
-    actions.className="section-actions no-print";
-    const b=document.createElement("button");
-    b.className="section-copy";
-    b.type="button";
-    b.textContent="Copy this section";
-    b.onclick=()=>{
-      const text=sectionTextFromHeading(h2);
-      copyText(text, "Section "+h2.textContent.trim()+" copied.");
-    };
-    actions.appendChild(b);
-    h2.insertAdjacentElement("afterend",actions);
-  });
-  const aiHeading=Array.from(document.querySelectorAll(".page > h2")).find(h=>h.textContent.trim().startsWith("11."));
-  if(aiHeading && !document.getElementById("copyAISection")){
-    const b=document.createElement("button");
-    b.id="copyAISection";b.className="copy-all no-print";b.type="button";
-    b.textContent="Copy AI Research Prompt";
-    b.onclick=()=>{buildPrompt();copyText(document.getElementById("prompt").value,"AI research prompt copied.");};
-    aiHeading.insertAdjacentElement("afterend",b);
-  }
-  const summaryHeading=Array.from(document.querySelectorAll(".page > h2")).find(h=>h.textContent.trim().startsWith("12."));
-  if(summaryHeading && !document.getElementById("copyAllRecord")){
-    const b=document.createElement("button");
-    b.id="copyAllRecord";b.className="copy-all no-print";b.type="button";
-    b.textContent="Copy Entire Research Record";
-    b.onclick=()=>{
-      const text=Array.from(document.querySelectorAll(".page > h2, .page > .stage > h2"))
-        .filter(h=>/^([1-9]|1[0-3])\./.test(h.textContent.trim()))
-        .map(sectionTextFromHeading).join("\n\n");
-      copyText(text,"Entire research record copied.");
-    };
-    summaryHeading.insertAdjacentElement("afterend",b);
-  }
-}
-function buildPrintView(){
-  let old=document.getElementById("printView");
-  if(old) old.remove();
-  const source=document.querySelector(".page");
-  const clone=source.cloneNode(true);
-  clone.classList.add("print-page");
-  clone.querySelectorAll(".no-print,.section-actions,.copy-all,.actions").forEach(e=>e.remove());
-  clone.querySelectorAll("textarea").forEach(e=>{const p=document.createElement("div");p.className="print-field-value";p.textContent=e.value||"";e.replaceWith(p);});
-  clone.querySelectorAll("input").forEach(e=>{const p=document.createElement("div");p.className="print-field-value";if(e.type==="checkbox")p.textContent=(e.checked?"[x] ":"[ ] ")+(e.parentElement?e.parentElement.textContent.trim():"");else p.textContent=e.value||"";e.replaceWith(p);});
-  clone.querySelectorAll("select").forEach(e=>{const p=document.createElement("div");p.className="print-field-value";p.textContent=e.options[e.selectedIndex]?.text||e.value||"";e.replaceWith(p);});
-  old=document.createElement("div"); old.id="printView"; old.appendChild(clone); document.body.appendChild(old);
-}
-window.addEventListener("beforeprint",()=>{buildPrintView();document.body.classList.add("printing");});
-window.addEventListener("afterprint",()=>{document.body.classList.remove("printing");const p=document.getElementById("printView");if(p)p.remove();});
-
-function clearAll(){if(confirm("Clear this research record?")){document.querySelectorAll("input,textarea").forEach(e=>{if(e.type==="checkbox")e.checked=false;else e.value=""});document.getElementById("date").value=new Date(Date.now()-new Date().getTimezoneOffset()*60000).toISOString().slice(0,10);document.getElementById("prompt").value="";document.getElementById("readyMessage").style.display="none";}}
-function loadExample(){
-document.getElementById("name").value="1214 Soquel Avenue / Seabright Plaza";
-document.getElementById("address").value="1214 Soquel Avenue, Santa Cruz, California";
-document.getElementById("jurisdiction").value="City of Santa Cruz, Santa Cruz County, California";
-document.getElementById("purpose").value="Demonstration case: investigate the property's history, existing conditions, liabilities, existing values, applicable civic rules, redevelopment options, and future flexibility without deciding the project's outcome.";
-document.getElementById("history").value="Begin with City project records, parcel/GIS records, permits, assessor/property records, historical maps, and other authoritative sources. Record what can actually be established.";
-document.getElementById("uses").value="Current site includes existing buildings and commercial uses reported by community members. Verify each use, lease/ownership relationship, and building history independently.";
-document.getElementById("historySources").value="City of Santa Cruz project page; City eTRAKiT; official parcel/permit records; additional records to be researched.";
-document.getElementById("condition").value="Community/property-owner statements about building condition should be treated as claims until supported by inspection reports, permits, code records, engineering reports, or other evidence.";
-document.getElementById("physical").value="Research structural, seismic, fire/life-safety, accessibility, utility, drainage/stormwater, environmental, maintenance, and other documented site conditions.";
-document.getElementById("conditionSources").value="To be researched and audited.";
-document.getElementById("legal").value="Research leases, ownership, easements, contracts, permits, code obligations, and any relevant litigation or administrative proceedings. Do not infer liability from allegations.";
-document.getElementById("riskOwners").value="Map each documented obligation to the party identified by the source. Distinguish owner, tenant, applicant, City, County, state agency, and other roles.";
-document.getElementById("financial").value="Do not estimate rehabilitation or redevelopment economics without identifying the assumptions and source. Separate market claims from documented costs.";
-document.getElementById("legalSources").value="Official City/County records and court or agency records where applicable.";
-document.getElementById("optionA").value="Research retention, repair, or rehabilitation of existing buildings and uses.";
-document.getElementById("optionB").value="Research partial redevelopment, adaptive reuse, or a modified project.";
-document.getElementById("optionC").value="Research the current replacement/new-development concept as documented by the applicant and City.";
-document.getElementById("optionD").value="Record any other legally and physically plausible alternatives identified by qualified sources.";
-document.getElementById("optionCompare").value="Compare requirements, costs, risks, existing values, housing/community effects, time, and future flexibility without ranking the options.";
-document.getElementById("verifier").value="City Planning / relevant City departments for City records and process; property/applicant representatives for project-specific information; qualified professionals for technical conditions; other official custodians for specialized records.";
-document.getElementById("decider").value="Identify the actual decision-maker for each entitlement or approval after the formal application and applicable process are established. Do not assume a particular commission or council decides every issue.";
-document.getElementById("rules").value="Research applicable zoning/objective standards, state housing law, local plans, permits, CEQA requirements, and other applicable rules from authoritative sources.";
-document.getElementById("status").value="City records currently describe the 1214 concepts as SB330-only preapplications and preliminary massing concepts; verify current status before relying on this record.";
-document.getElementById("clock").value="Research the applicable preapplication/formal-application deadlines, review periods, hearing requirements, and other legal versus estimated clocks.";
-document.getElementById("futureCreate").value="Document future housing, commercial, public-space, transportation, economic, or other choices created by each alternative.";
-document.getElementById("futureLose").value="Document existing uses, physical configurations, affordability/business arrangements, or other choices that could become harder or impossible to restore.";
-document.getElementById("reversibility").value="Classify consequences as reversible, costly to reverse, or effectively permanent based on evidence—not rhetoric.";
-document.getElementById("unknowns").value="What is the documented condition of the existing buildings? What obligations are attached to the property? What alternatives are legally/physically feasible? Which decisions remain? What existing values have not yet been documented?";
-document.getElementById("summaryNext").value="Open and audit the underlying City, property, legal, technical, and historical sources before drawing conclusions.";
-buildPrompt();
-window.scrollTo({top:0,behavior:"smooth"});
-}
-document.getElementById("date").value=new Date(Date.now()-new Date().getTimezoneOffset()*60000).toISOString().slice(0,10);
-document.getElementById("prompt").value="";
-addSectionCopyButtons();
-</script>
-
-<style>
-@media print{
-  .print-field-value{
-    white-space:pre-wrap;
-    overflow-wrap:anywhere;
-    min-height:1em;
-    margin:4px 0 10px;
-    padding:0;
-  }
-  .print-field-value:empty::after{content:"Not entered";color:#666;font-style:italic}
-  .print-page .prompt{white-space:pre-wrap;overflow-wrap:anywhere}
-}
-.toast{
-  position:fixed;right:18px;bottom:18px;z-index:9999;
-  background:#222;color:#fff;padding:10px 14px;border-radius:6px;
-  box-shadow:0 3px 14px #0003;font-size:14px;
-}
-</style>
-<script>
-/* Functional-build pass: consistent section copying, clipboard fallback, and feedback. */
-function showToast(message){
-  const old=document.querySelector(".toast");
-  if(old) old.remove();
-  const t=document.createElement("div");
-  t.className="toast";
-  t.textContent=message;
-  document.body.appendChild(t);
-  setTimeout(()=>t.remove(),2200);
 }
 
 async function copyText(textValue,message){
   const text=String(textValue||"").trim();
   if(!text){showToast("Nothing to copy in this section.");return false;}
   try{
-    if(navigator.clipboard && window.isSecureContext){
-      await navigator.clipboard.writeText(text);
-    }else{
-      const ta=document.createElement("textarea");
-      ta.value=text;
-      ta.setAttribute("readonly","");
-      ta.style.position="fixed";
-      ta.style.opacity="0";
-      document.body.appendChild(ta);
-      ta.select();
-      ta.setSelectionRange(0,ta.value.length);
-      const ok=document.execCommand("copy");
-      ta.remove();
-      if(!ok) throw new Error("copy failed");
+    if(navigator.clipboard&&window.isSecureContext) await navigator.clipboard.writeText(text);
+    else{
+      const ta=document.createElement("textarea");ta.value=text;ta.setAttribute("readonly","");
+      ta.style.position="fixed";ta.style.opacity="0";document.body.appendChild(ta);ta.select();ta.setSelectionRange(0,ta.value.length);
+      const ok=document.execCommand("copy");ta.remove();if(!ok)throw new Error("copy failed");
     }
-    showToast(message||"Copied.");
-    return true;
-  }catch(err){
-    showToast("Copy did not work. The text is still available to select manually.");
-    return false;
-  }
+    showToast(message||"Copied.");return true;
+  }catch(err){showToast("Copy did not work. The text is still available to select manually.");return false;}
+}
+function showToast(message){
+  const old=document.querySelector(".toast");if(old)old.remove();
+  const t=document.createElement("div");t.className="toast";t.textContent=message;document.body.appendChild(t);
+  setTimeout(()=>t.remove(),2200);
 }
 
 function sectionTextFromHeading(h2){
-  const wrapper=document.createElement("div");
-  wrapper.appendChild(h2.cloneNode(true));
-  const stage=h2.parentElement && h2.parentElement.classList.contains("stage");
+  const wrapper=document.createElement("div");wrapper.appendChild(h2.cloneNode(true));
+  const stage=h2.parentElement&&h2.parentElement.classList.contains("stage");
   let node=h2.nextElementSibling;
   while(node){
-    if(stage ? node.classList.contains("stage") : node.tagName==="H2") break;
-    if(!node.classList.contains("no-copy")) wrapper.appendChild(node.cloneNode(true));
+    if(stage?node.classList.contains("stage"):node.tagName==="H2")break;
+    if(!node.classList.contains("no-copy"))wrapper.appendChild(node.cloneNode(true));
     node=node.nextElementSibling;
   }
-
   wrapper.querySelectorAll(".section-actions,.copy-all,.actions,.no-print").forEach(e=>e.remove());
-
-  wrapper.querySelectorAll("textarea").forEach(e=>{
-    const p=document.createElement("p");
-    p.textContent=e.value||"";
-    e.replaceWith(p);
-  });
-  wrapper.querySelectorAll("input").forEach(e=>{
-    const p=document.createElement("p");
-    if(e.type==="checkbox"){
-      const label=e.closest("label");
-      p.textContent=(e.checked?"[x] ":"[ ] ")+(label?label.textContent.trim():"");
-    }else{
-      p.textContent=e.value||"";
-    }
-    e.replaceWith(p);
-  });
-  wrapper.querySelectorAll("select").forEach(e=>{
-    const p=document.createElement("p");
-    p.textContent=e.options[e.selectedIndex]?.text||e.value||"";
-    e.replaceWith(p);
-  });
-
+  wrapper.querySelectorAll("textarea").forEach(e=>{const p=document.createElement("p");p.textContent=e.value||"";e.replaceWith(p);});
+  wrapper.querySelectorAll("input").forEach(e=>{const p=document.createElement("p");const label=e.closest("label");p.textContent=e.type==="checkbox"?(e.checked?"[x] ":"[ ] ")+(label?label.textContent.trim():""):(e.value||"");e.replaceWith(p);});
+  wrapper.querySelectorAll("select").forEach(e=>{const p=document.createElement("p");p.textContent=e.options[e.selectedIndex]?.text||e.value||"";e.replaceWith(p);});
   return wrapper.innerText.replace(/\n{3,}/g,"\n\n").trim();
 }
-
 function addSectionCopyButtons(){
-  document.querySelectorAll(".page > h2, .page > .stage > h2").forEach(h2=>{
-    const existing=h2.nextElementSibling;
-    if(existing && existing.classList.contains("section-actions")) existing.remove();
-
-    const actions=document.createElement("div");
-    actions.className="section-actions no-print";
-    const b=document.createElement("button");
-    b.className="section-copy";
-    b.type="button";
-    b.textContent="Copy this section";
-    b.addEventListener("click",()=>{
-      copyText(sectionTextFromHeading(h2),"Section "+h2.textContent.trim()+" copied.");
-    });
-    actions.appendChild(b);
-    h2.insertAdjacentElement("afterend",actions);
+  document.querySelectorAll(".page > h2,.page > .stage > h2").forEach(h2=>{
+    const old=h2.nextElementSibling;if(old&&old.classList.contains("section-actions"))old.remove();
+    const actions=document.createElement("div");actions.className="section-actions no-print";
+    const b=document.createElement("button");b.className="section-copy";b.type="button";b.textContent="Copy this section";
+    b.addEventListener("click",()=>copyText(sectionTextFromHeading(h2),"Section "+h2.textContent.trim()+" copied."));
+    actions.appendChild(b);h2.insertAdjacentElement("afterend",actions);
   });
-
-  document.getElementById("copyAISection")?.remove();
-  const aiHeading=Array.from(document.querySelectorAll(".page > h2"))
-    .find(h=>h.textContent.trim().startsWith("11."));
+  const aiHeading=Array.from(document.querySelectorAll(".page > h2")).find(h=>h.textContent.trim().startsWith("11."));
   if(aiHeading){
-    const b=document.createElement("button");
-    b.id="copyAISection";
-    b.className="copy-all no-print";
-    b.type="button";
-    b.textContent="Copy AI Research Prompt Only";
-    b.addEventListener("click",()=>{
-      buildPrompt();
-      copyText(document.getElementById("prompt").value,"AI research prompt copied.");
-    });
+    const b=document.createElement("button");b.id="copyAISection";b.className="copy-all no-print";b.type="button";b.textContent="Copy AI Research Prompt Only";
+    b.addEventListener("click",()=>{buildPrompt();incrementCounter();copyText(document.getElementById("prompt").value,"AI research prompt copied.");});
     aiHeading.insertAdjacentElement("afterend",b);
   }
-
-  document.getElementById("copyAllRecord")?.remove();
-  const summaryHeading=Array.from(document.querySelectorAll(".page > h2"))
-    .find(h=>h.textContent.trim().startsWith("12."));
+  const summaryHeading=Array.from(document.querySelectorAll(".page > h2")).find(h=>h.textContent.trim().startsWith("12."));
   if(summaryHeading){
-    const b=document.createElement("button");
-    b.id="copyAllRecord";
-    b.className="copy-all no-print";
-    b.type="button";
-    b.textContent="Copy Entire Research Record";
-    b.addEventListener("click",()=>{
-      const text=Array.from(document.querySelectorAll(".page > h2, .page > .stage > h2"))
-        .filter(h=>/^([1-9]|1[0-3])\./.test(h.textContent.trim()))
-        .map(sectionTextFromHeading)
-        .join("\n\n");
-      copyText(text,"Entire research record copied.");
-    });
+    const b=document.createElement("button");b.id="copyAllRecord";b.className="copy-all no-print";b.type="button";b.textContent="Copy Entire Research Record";
+    b.addEventListener("click",()=>{const text=Array.from(document.querySelectorAll(".page > h2,.page > .stage > h2")).filter(h=>/^([1-9]|1[0-3])\./.test(h.textContent.trim())).map(sectionTextFromHeading).join("\n\n");copyText(text,"Entire research record copied.");});
     summaryHeading.insertAdjacentElement("afterend",b);
   }
 }
-
-function copyPrompt(){
-  buildPrompt();
-  copyText(document.getElementById("prompt").value,"AI research prompt copied.");
+function buildPrintView(){
+  let old=document.getElementById("printView");if(old)old.remove();
+  const source=document.querySelector(".page");const clone=source.cloneNode(true);clone.classList.add("print-page");
+  clone.querySelectorAll(".no-print,.section-actions,.copy-all,.actions").forEach(e=>e.remove());
+  clone.querySelectorAll("textarea").forEach(e=>{const p=document.createElement("div");p.className="print-field-value";p.textContent=e.value||"";e.replaceWith(p);});
+  clone.querySelectorAll("input").forEach(e=>{const p=document.createElement("div");p.className="print-field-value";if(e.type==="checkbox")p.textContent=(e.checked?"[x] ":"[ ] ")+(e.parentElement?e.parentElement.textContent.trim():"");else p.textContent=e.value||"";e.replaceWith(p);});
+  clone.querySelectorAll("select").forEach(e=>{const p=document.createElement("div");p.className="print-field-value";p.textContent=e.options[e.selectedIndex]?.text||e.value||"";e.replaceWith(p);});
+  old=document.createElement("div");old.id="printView";old.appendChild(clone);document.body.appendChild(old);
 }
+window.addEventListener("beforeprint",()=>{buildPrintView();document.body.classList.add("printing");});
+window.addEventListener("afterprint",()=>{document.body.classList.remove("printing");const p=document.getElementById("printView");if(p)p.remove();});
 
-/* Rebuild copy controls so there is exactly one clean copy control per section. */
-document.querySelectorAll(".section-actions,#copyAISection,#copyAllRecord").forEach(e=>e.remove());
+function clearAll(){
+  if(!confirm("Clear this research record?"))return;
+  document.querySelectorAll("input,textarea").forEach(e=>{if(e.type==="checkbox")e.checked=false;else e.value=""});
+  document.getElementById("date").value=today();document.getElementById("prompt").value="";
+  document.getElementById("readyMessage").style.display="none";setCounter(0);
+}
+function loadExample(){
+  document.getElementById("name").value="1214 Soquel Avenue / Seabright Plaza";
+  document.getElementById("address").value="1214 Soquel Avenue, Santa Cruz, California";
+  document.getElementById("jurisdiction").value="City of Santa Cruz, Santa Cruz County, California";
+  document.getElementById("purpose").value="Demonstration case: investigate the property's history, existing conditions, liabilities, existing values, applicable civic rules, redevelopment options, and future flexibility without deciding the project's outcome.";
+  document.getElementById("history").value="Begin with City project records, parcel/GIS records, permits, assessor/property records, historical maps, and other authoritative sources. Record what can actually be established.";
+  document.getElementById("uses").value="Current site includes existing buildings and commercial uses reported by community members. Verify each use, lease/ownership relationship, and building history independently.";
+  document.getElementById("historySources").value="City of Santa Cruz project page; City eTRAKiT; official parcel/permit records; additional records to be researched.";
+  document.getElementById("condition").value="Community/property-owner statements about building condition should be treated as claims until supported by inspection reports, permits, code records, engineering reports, or other evidence.";
+  document.getElementById("physical").value="Research structural, seismic, fire/life-safety, accessibility, utility, drainage/stormwater, environmental, maintenance, and other documented site conditions.";
+  document.getElementById("conditionSources").value="To be researched and audited.";
+  document.getElementById("legal").value="Research leases, ownership, easements, contracts, permits, code obligations, and any relevant litigation or administrative proceedings. Do not infer liability from allegations.";
+  document.getElementById("riskOwners").value="Map each documented obligation to the party identified by the source. Distinguish owner, tenant, applicant, City, County, state agency, and other roles.";
+  document.getElementById("financial").value="Do not estimate rehabilitation or redevelopment economics without identifying the assumptions and source. Separate market claims from documented costs.";
+  document.getElementById("legalSources").value="Official City/County records and court or agency records where applicable.";
+  document.getElementById("optionA").value="Research retention, repair, or rehabilitation of existing buildings and uses.";
+  document.getElementById("optionB").value="Research partial redevelopment, adaptive reuse, or a modified project.";
+  document.getElementById("optionC").value="Research the current replacement/new-development concept as documented by the applicant and City.";
+  document.getElementById("optionD").value="Record any other legally and physically plausible alternatives identified by qualified sources.";
+  document.getElementById("optionCompare").value="Compare requirements, costs, risks, existing values, housing/community effects, time, and future flexibility without ranking the options.";
+  document.getElementById("verifier").value="City Planning / relevant City departments for City records and process; property/applicant representatives for project-specific information; qualified professionals for technical conditions; other official custodians for specialized records.";
+  document.getElementById("decider").value="Identify the actual decision-maker for each entitlement or approval after the formal application and applicable process are established. Do not assume a particular commission or council decides every issue.";
+  document.getElementById("rules").value="Research applicable zoning/objective standards, state housing law, local plans, permits, CEQA requirements, and other applicable rules from authoritative sources.";
+  document.getElementById("status").value="City records currently describe the 1214 concepts as SB330-only preapplications and preliminary massing concepts; verify current status before relying on this record.";
+  document.getElementById("clock").value="Research the applicable preapplication/formal-application deadlines, review periods, hearing requirements, and other legal versus estimated clocks.";
+  document.getElementById("futureCreate").value="Document future housing, commercial, public-space, transportation, economic, or other choices created by each alternative.";
+  document.getElementById("futureLose").value="Document existing uses, physical configurations, affordability/business arrangements, or other choices that could become harder or impossible to restore.";
+  document.getElementById("reversibility").value="Classify consequences as reversible, costly to reverse, or effectively permanent based on evidence—not rhetoric.";
+  document.getElementById("unknowns").value="What is the documented condition of the existing buildings? What obligations are attached to the property? What alternatives are legally/physically feasible? Which decisions remain? What existing values have not yet been documented?";
+  document.getElementById("summaryNext").value="Open and audit the underlying City, property, legal, technical, and historical sources before drawing conclusions.";
+  buildPrompt();window.scrollTo({top:0,behavior:"smooth"});
+}
+document.querySelectorAll("input,textarea,select").forEach(e=>e.addEventListener("input",buildPrompt));
+document.getElementById("date").value=today();
+setCounter(getCounter());
 addSectionCopyButtons();
 </script>
 </body>
