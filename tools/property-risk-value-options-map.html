@@ -408,7 +408,7 @@ function addSectionCopyButtons(){
     summaryHeading.insertAdjacentElement("afterend",b);
   }
 }
-function clearAll(){if(confirm("Clear this research record?")){document.querySelectorAll("input,textarea").forEach(e=>{if(e.type==="checkbox")e.checked=false;else e.value=""});document.getElementById("date").value=new Date().toISOString().slice(0,10);buildPrompt();}}
+function clearAll(){if(confirm("Clear this research record?")){document.querySelectorAll("input,textarea").forEach(e=>{if(e.type==="checkbox")e.checked=false;else e.value=""});document.getElementById("date").value=new Date().toISOString().slice(0,10);document.getElementById("prompt").value="";document.getElementById("readyMessage").style.display="none";}}
 function loadExample(){
 document.getElementById("name").value="1214 Soquel Avenue / Seabright Plaza";
 document.getElementById("address").value="1214 Soquel Avenue, Santa Cruz, California";
@@ -443,7 +443,7 @@ buildPrompt();
 window.scrollTo({top:0,behavior:"smooth"});
 }
 document.getElementById("date").value=new Date().toISOString().slice(0,10);
-buildPrompt();
+document.getElementById("prompt").value="";
 addSectionCopyButtons();
 </script>
 </body>
