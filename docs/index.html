@@ -333,9 +333,10 @@ function copyPrompt(){buildPrompt();navigator.clipboard.writeText(document.getEl
 function sectionTextFromHeading(h2){
   const wrapper=document.createElement("div");
   wrapper.appendChild(h2.cloneNode(true));
+  const inStage=h2.parentElement && h2.parentElement.classList.contains("stage");
   let node=h2.nextElementSibling;
   while(node){
-    if(node.tagName==="H2") break;
+    if(inStage ? node.classList.contains("stage") : node.tagName==="H2") break;
     wrapper.appendChild(node.cloneNode(true));
     node=node.nextElementSibling;
   }
