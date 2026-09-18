@@ -45,14 +45,29 @@ table{width:100%;border-collapse:collapse;margin:12px 0}th,td{border:1px solid v
 @media(min-width:901px){.page{margin-right:350px;max-width:980px}}
 @media(max-width:900px){.guided-panel{position:static;width:auto;max-height:none;margin:12px 0 20px;box-shadow:none}}
 @media print{.guided-panel{display:none!important}.page{margin:auto}}
+
+.help-tip{display:inline-block;margin-left:6px}
+.help-tip button{width:auto!important;margin:0!important;padding:2px 7px!important;font-size:12px;border-radius:50%;line-height:1.2}
+.help-pop{display:none;margin:5px 0 9px;padding:8px 10px;border-left:3px solid #174a6e;background:#f1f5f7;font-size:13px;color:#444}
+.help-tip.open .help-pop{display:block}
+.example{font-size:13px;color:#666;margin:-3px 0 10px}
+.example strong{color:#444}
+.field-label{display:flex;align-items:center;gap:4px}
+@media(max-width:700px){
+ body{padding:0}
+ .guided-panel{font-size:16px}
+ .guided-panel button,.guided-panel select{min-height:44px}
+ .guided-check{padding:5px 0}
+ .help-tip button{min-height:30px!important}
+}
 </style>
 </head>
 <body>
 
 <div class="guided-panel no-print">
-<h2>Experimental Guided Standards</h2>
-<p class="guided-help">Separate experiment — the original form stays unchanged. Choose a destination field, open a category, check what applies, then insert the selections. You can still edit everything by hand.</p>
-<label for="guidedTarget"><strong>Put selections into:</strong></label>
+<h2>Experimental Guided Standards <span class="help-tip"><button type="button" aria-expanded="false" onclick="toggleHelp(this)" title="How to use this panel">?</button><span class="help-pop">Use this panel as a helper, not a required form. Choose a destination field, open a category, check anything that seems relevant, and insert it. You can then change the wording or type anything else yourself. On a phone, tap the ? for help; there is no hover requirement.</span></span></h2>
+<p class="guided-help"><strong>Made for phones first.</strong> Tap a category to open it. Tap ? for a short explanation. Check anything that may apply, then insert it. If you do not see your situation, type it yourself in the normal field.</p><p class="example"><strong>Example:</strong> If you are unsure what “existing condition” means, the helper can suggest “Structural condition,” “Accessibility,” or “Deferred maintenance.” Those are prompts to investigate, not claims that the problem exists.</p>
+<label for="guidedTarget"><strong>Put selections into:</strong><span class="help-tip"><button type="button" aria-expanded="false" onclick="toggleHelp(this)" title="About this choice">?</button><span class="help-pop">Choose the blank or notes field where you want the checked items to be added.</span></span></label>
 <select id="guidedTarget">
 <option value="physical">Section 4 — Physical issues</option>
 <option value="condition">Section 4 — Existing condition</option>
@@ -66,7 +81,8 @@ table{width:100%;border-collapse:collapse;margin:12px 0}th,td{border:1px solid v
 <option value="summaryNext">Section 12 — Next research step</option>
 </select>
 <p class="guided-note">Selections are added to the chosen field; they do not erase existing writing.</p>
-<details class="guided-group" open><summary>Physical / site conditions</summary>
+<p class="example"><strong>Example:</strong> Choose “Section 4 — Physical issues,” check “Seismic” and “Drainage / stormwater,” then tap “Insert selected items.” The field becomes a starting point you can edit.</p>
+<details class="guided-group" open><summary>Physical / site conditions <span class="help-tip"><button type="button" aria-expanded="false" onclick="event.preventDefault();event.stopPropagation();toggleHelp(this)" title="What is this category?">?</button><span class="help-pop">Things about the land or buildings that may need inspection, documentation, or professional review.</span></span></summary>
 <label class="guided-check"><input type="checkbox" value="Structural condition">Structural condition</label>
 <label class="guided-check"><input type="checkbox" value="Seismic">Seismic</label>
 <label class="guided-check"><input type="checkbox" value="Fire / life safety">Fire / life safety</label>
@@ -77,7 +93,7 @@ table{width:100%;border-collapse:collapse;margin:12px 0}th,td{border:1px solid v
 <label class="guided-check"><input type="checkbox" value="Deferred maintenance">Deferred maintenance</label>
 <label class="guided-check"><input type="checkbox" value="Trees / vegetation">Trees / vegetation</label>
 </details>
-<details class="guided-group"><summary>Legal / contractual</summary>
+<details class="guided-group"><summary>Legal / contractual <span class="help-tip"><button type="button" aria-expanded="false" onclick="event.preventDefault();event.stopPropagation();toggleHelp(this)" title="What is this category?">?</button><span class="help-pop">Documents and obligations that may attach to the property or the people using or controlling it.</span></span></summary>
 <label class="guided-check"><input type="checkbox" value="Leases / tenant agreements">Leases / tenant agreements</label>
 <label class="guided-check"><input type="checkbox" value="Easements">Easements</label>
 <label class="guided-check"><input type="checkbox" value="Title / ownership records">Title / ownership records</label>
@@ -86,7 +102,7 @@ table{width:100%;border-collapse:collapse;margin:12px 0}th,td{border:1px solid v
 <label class="guided-check"><input type="checkbox" value="Permits">Permits</label>
 <label class="guided-check"><input type="checkbox" value="Litigation / proceedings">Litigation / proceedings</label>
 </details>
-<details class="guided-group"><summary>Existing value / function</summary>
+<details class="guided-group"><summary>Existing value / function <span class="help-tip"><button type="button" aria-expanded="false" onclick="event.preventDefault();event.stopPropagation();toggleHelp(this)" title="What is this category?">?</button><span class="help-pop">What the property already does for people, businesses, residents, or the community. This is not a judgment that the value is greater or lesser.</span></span></summary>
 <label class="guided-check"><input type="checkbox" value="Housing">Housing</label>
 <label class="guided-check"><input type="checkbox" value="Local businesses">Local businesses</label>
 <label class="guided-check"><input type="checkbox" value="Services">Services</label>
@@ -96,7 +112,7 @@ table{width:100%;border-collapse:collapse;margin:12px 0}th,td{border:1px solid v
 <label class="guided-check"><input type="checkbox" value="Cultural / historical value">Cultural / historical value</label>
 <label class="guided-check"><input type="checkbox" value="Public access / convenience">Public access / convenience</label>
 </details>
-<details class="guided-group"><summary>Process / authority</summary>
+<details class="guided-group"><summary>Process / authority <span class="help-tip"><button type="button" aria-expanded="false" onclick="event.preventDefault();event.stopPropagation();toggleHelp(this)" title="What is this category?">?</button><span class="help-pop">People or agencies that may provide information, review something, or make a decision. The checkbox does not establish legal authority; verify it.</span></span></summary>
 <label class="guided-check"><input type="checkbox" value="City Planning">City Planning</label>
 <label class="guided-check"><input type="checkbox" value="Building / code">Building / code</label>
 <label class="guided-check"><input type="checkbox" value="Fire">Fire</label>
@@ -105,7 +121,7 @@ table{width:100%;border-collapse:collapse;margin:12px 0}th,td{border:1px solid v
 <label class="guided-check"><input type="checkbox" value="State agency">State agency</label>
 <label class="guided-check"><input type="checkbox" value="Qualified technical professional">Qualified technical professional</label>
 </details>
-<details class="guided-group"><summary>Future flexibility</summary>
+<details class="guided-group"><summary>Future flexibility <span class="help-tip"><button type="button" aria-expanded="false" onclick="event.preventDefault();event.stopPropagation();toggleHelp(this)" title="What is this category?">?</button><span class="help-pop">Questions about what an option may make easier, harder, reversible, or difficult to restore later. Treat these as research prompts, not conclusions.</span></span></summary>
 <label class="guided-check"><input type="checkbox" value="Creates future housing choices">Creates future housing choices</label>
 <label class="guided-check"><input type="checkbox" value="Creates future commercial choices">Creates future commercial choices</label>
 <label class="guided-check"><input type="checkbox" value="Preserves adaptability">Preserves adaptability</label>
@@ -533,6 +549,12 @@ document.addEventListener("change",e=>{
   document.getElementById("guidedSelected").textContent=items.length?items.join(" • "):"No selections yet.";
  }
 });
+
+function toggleHelp(button){
+ const tip=button.closest(".help-tip");
+ const open=tip.classList.toggle("open");
+ button.setAttribute("aria-expanded",open?"true":"false");
+}
 </script>
 </body>
 </html>
