@@ -330,42 +330,49 @@ function prepareResearch(){
 }
 function copyPrompt(){buildPrompt();navigator.clipboard.writeText(document.getElementById("prompt").value).then(()=>alert("AI research prompt copied."));}
 
-function cloneSectionText(root){
-  const clone=root.cloneNode(true);
-  clone.querySelectorAll(".section-actions,.copy-all").forEach(e=>e.remove());
-  clone.querySelectorAll("textarea").forEach(e=>{const p=document.createElement("p");p.textContent=e.value||"";e.replaceWith(p);});
-  clone.querySelectorAll("input").forEach(e=>{
-    if(e.type==="checkbox"){const p=document.createElement("p");p.textContent=(e.checked?"[x] ":"[ ] ")+(e.parentElement?e.parentElement.textContent.trim():"");e.replaceWith(p);}
-    else {const p=document.createElement("p");p.textContent=e.value||"";e.replaceWith(p);}
+function sectionTextFromHeading(h2){
+  const wrapper=document.createElement("div");
+  wrapper.appendChild(h2.cloneNode(true));
+  let node=h2.parentElement.classList.contains("stage") ? h2.parentElement : h2.nextElementSibling;
+  if(h2.parentElement.classList.contains("stage")){
+    while(node){
+      if(node!==h2.parentElement && node.tagName==="H2") break;
+      wrapper.appendChild(node.cloneNode(true));
+      node=node.nextElementSibling;
+    }
+  }else{
+    while(node){
+      if(node.tagName==="H2") break;
+      wrapper.appendChild(node.cloneNode(true));
+      node=node.nextElementSibling;
+    }
+  }
+  wrapper.querySelectorAll(".section-actions,.copy-all").forEach(e=>e.remove());
+  wrapper.querySelectorAll("textarea").forEach(e=>{const p=document.createElement("p");p.textContent=e.value||"";e.replaceWith(p);});
+  wrapper.querySelectorAll("input").forEach(e=>{
+    const p=document.createElement("p");
+    if(e.type==="checkbox") p.textContent=(e.checked?"[x] ":"[ ] ")+(e.parentElement?e.parentElement.textContent.trim():"");
+    else p.textContent=e.value||"";
+    e.replaceWith(p);
   });
-  clone.querySelectorAll("select").forEach(e=>{const p=document.createElement("p");p.textContent=e.value||"";e.replaceWith(p);});
-  return clone.innerText.replace(/\n{3,}/g,"\n\n").trim();
+  wrapper.querySelectorAll("select").forEach(e=>{const p=document.createElement("p");p.textContent=e.value||"";e.replaceWith(p);});
+  return wrapper.innerText.replace(/\n{3,}/g,"\n\n").trim();
 }
 async function copyText(textValue, message){
   try{
+    if(!textValue.trim()) throw new Error("Nothing to copy");
     await navigator.clipboard.writeText(textValue);
     alert(message);
   }catch(err){
     const ta=document.createElement("textarea");
     ta.value=textValue;document.body.appendChild(ta);ta.select();
-    document.execCommand("copy");ta.remove();
-    alert(message);
+    try{document.execCommand("copy");alert(message);}catch(e){alert("Copy did not work. You can select the text manually.");}
+    ta.remove();
   }
-}
-function getSectionRoot(h2){
-  if(h2.parentElement.classList.contains("stage")) return h2.parentElement;
-  const wrapper=document.createElement("div");
-  let n=h2;
-  while(n){
-    if(n!==h2 && n.tagName==="H2") break;
-    if(n!==h2 || n===h2) wrapper.appendChild(n.cloneNode(true));
-    n=n.nextElementSibling;
-  }
-  return wrapper;
 }
 function addSectionCopyButtons(){
   document.querySelectorAll(".page > h2, .page > .stage > h2").forEach((h2)=>{
-    if(h2.querySelector(".section-copy")) return;
+    if(h2.nextElementSibling && h2.nextElementSibling.querySelector && h2.nextElementSibling.querySelector(".section-copy")) return;
     const actions=document.createElement("div");
     actions.className="section-actions no-print";
     const b=document.createElement("button");
@@ -373,26 +380,34 @@ function addSectionCopyButtons(){
     b.type="button";
     b.textContent="Copy this section";
     b.onclick=()=>{
-      const root=getSectionRoot(h2);
-      copyText(cloneSectionText(root), "Section copied.");
+      const text=sectionTextFromHeading(h2);
+      copyText(text, "Section "+h2.textContent.trim()+" copied.");
     };
     actions.appendChild(b);
     h2.insertAdjacentElement("afterend",actions);
   });
+  const aiHeading=Array.from(document.querySelectorAll(".page > h2")).find(h=>h.textContent.trim().startsWith("11."));
+  if(aiHeading && !document.getElementById("copyAISection")){
+    const b=document.createElement("button");
+    b.id="copyAISection";b.className="copy-all no-print";b.type="button";
+    b.textContent="Copy AI Research Prompt";
+    b.onclick=()=>{buildPrompt();copyText(document.getElementById("prompt").value,"AI research prompt copied.");};
+    aiHeading.insertAdjacentElement("afterend",b);
+  }
   const summaryHeading=Array.from(document.querySelectorAll(".page > h2")).find(h=>h.textContent.trim().startsWith("12."));
   if(summaryHeading && !document.getElementById("copyAllRecord")){
     const b=document.createElement("button");
     b.id="copyAllRecord";b.className="copy-all no-print";b.type="button";
     b.textContent="Copy Entire Research Record";
     b.onclick=()=>{
-      const page=document.querySelector(".page");
-      const text=cloneSectionText(page);
+      const text=Array.from(document.querySelectorAll(".page > h2, .page > .stage > h2"))
+        .filter(h=>/^([1-9]|1[0-3])\./.test(h.textContent.trim()))
+        .map(sectionTextFromHeading).join("\n\n");
       copyText(text,"Entire research record copied.");
     };
     summaryHeading.insertAdjacentElement("afterend",b);
   }
 }
-
 function clearAll(){if(confirm("Clear this research record?")){document.querySelectorAll("input,textarea").forEach(e=>{if(e.type==="checkbox")e.checked=false;else e.value=""});document.getElementById("date").value=new Date().toISOString().slice(0,10);buildPrompt();}}
 function loadExample(){
 document.getElementById("name").value="1214 Soquel Avenue / Seabright Plaza";
