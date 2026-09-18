@@ -195,7 +195,7 @@ function val(id){const e=document.getElementById(id);return e?e.value.trim():"";
 function checked(id){const e=document.getElementById(id);return e&&e.checked?"Yes":"No";}
 function buildPrompt(){
 const n=val("name")||"[property/project]";
-return `You are assisting with a neutral civic/property research project called “Property Risk, Value & Options Map.”
+const promptText = `You are assisting with a neutral civic/property research project called “Property Risk, Value & Options Map.”
 
 SUBJECT
 Property/project: ${n}
@@ -270,7 +270,8 @@ J. Unresolved questions
 K. Suggested next research steps
 
 For every important factual claim, identify the source. Never present an unverified statement as fact. If evidence is unavailable, write “not verified.”`;
-document.getElementById("prompt").value=prompt;
+document.getElementById("prompt").value=promptText;
+return promptText;
 }
 document.querySelectorAll("input,textarea,select").forEach(e=>e.addEventListener("input",buildPrompt));
 function prepareResearch(){
