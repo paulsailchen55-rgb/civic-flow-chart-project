@@ -25,7 +25,7 @@ textarea{min-height:78px;resize:vertical}.short{min-height:48px}
 .prompt{min-height:280px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:13px}
 table{width:100%;border-collapse:collapse;margin:12px 0}th,td{border:1px solid var(--line);padding:8px;vertical-align:top;text-align:left}th{background:var(--soft)}
 .footer{margin-top:45px;padding-top:18px;border-top:1px solid var(--line);color:var(--muted);font-size:13px}
-@media print{body{background:#fff;padding:0}.page{box-shadow:none;max-width:none;padding:24px}.actions,.no-print{display:none!important}input,textarea,select{border:0;padding:0;resize:none}.prompt{min-height:0;font-family:inherit}.pagebreak{break-before:page}}
+@media print{body{background:#fff;padding:0}.page{box-shadow:none;max-width:none;padding:24px}.actions,.no-print,#printView{display:none!important}input,textarea,select{border:0;padding:0;resize:none}.prompt{min-height:0;font-family:inherit}.pagebreak{break-before:page}}\n#printView{display:none}\n@media print{body.printing > .page{display:none}body.printing > #printView{display:block}.print-page{background:#fff;max-width:980px;margin:auto;padding:24px 0}.print-page .box,.print-page .notice{break-inside:avoid}.print-page textarea,.print-page input,.print-page select{white-space:pre-wrap}.print-page table{break-inside:auto}.print-page tr{break-inside:avoid}}
 @media(max-width:700px){body{padding:0}.page{padding:28px 20px}.grid{grid-template-columns:1fr}}
 
 .section-actions{margin:-2px 0 12px;text-align:right}
@@ -401,6 +401,21 @@ function addSectionCopyButtons(){
     summaryHeading.insertAdjacentElement("afterend",b);
   }
 }
+function buildPrintView(){
+  let old=document.getElementById("printView");
+  if(old) old.remove();
+  const source=document.querySelector(".page");
+  const clone=source.cloneNode(true);
+  clone.classList.add("print-page");
+  clone.querySelectorAll(".no-print,.section-actions,.copy-all,.actions").forEach(e=>e.remove());
+  clone.querySelectorAll("textarea").forEach(e=>{const p=document.createElement("div");p.className="print-field-value";p.textContent=e.value||"";e.replaceWith(p);});
+  clone.querySelectorAll("input").forEach(e=>{const p=document.createElement("div");p.className="print-field-value";if(e.type==="checkbox")p.textContent=(e.checked?"[x] ":"[ ] ")+(e.parentElement?e.parentElement.textContent.trim():"");else p.textContent=e.value||"";e.replaceWith(p);});
+  clone.querySelectorAll("select").forEach(e=>{const p=document.createElement("div");p.className="print-field-value";p.textContent=e.options[e.selectedIndex]?.text||e.value||"";e.replaceWith(p);});
+  old=document.createElement("div"); old.id="printView"; old.appendChild(clone); document.body.appendChild(old);
+}
+window.addEventListener("beforeprint",()=>{buildPrintView();document.body.classList.add("printing");});
+window.addEventListener("afterprint",()=>{document.body.classList.remove("printing");const p=document.getElementById("printView");if(p)p.remove();});
+
 function clearAll(){if(confirm("Clear this research record?")){document.querySelectorAll("input,textarea").forEach(e=>{if(e.type==="checkbox")e.checked=false;else e.value=""});document.getElementById("date").value=new Date().toISOString().slice(0,10);document.getElementById("prompt").value="";document.getElementById("readyMessage").style.display="none";}}
 function loadExample(){
 document.getElementById("name").value="1214 Soquel Avenue / Seabright Plaza";
