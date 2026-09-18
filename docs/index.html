@@ -316,6 +316,7 @@ function tableRowsText(){
   }).join("\n");
 }
 
+function copyPrompt(){buildPrompt();incrementCounter();copyText(document.getElementById("prompt").value,"AI research prompt copied.");}
 function prepareResearch(){
   buildPrompt();
   const n=val("name")||"Unnamed property/project";
